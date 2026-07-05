@@ -10,8 +10,8 @@
 </head>
 <body>
 <?php if (!isset($hideLayout)): ?>
-<div class="d-flex">
-    <nav class="sidebar bg-dark text-white p-3" style="width:250px;min-height:100vh;">
+<div class="d-flex admin-layout">
+    <nav class="sidebar bg-dark text-white p-3">
         <h5 class="mb-4"><i class="bi bi-mortarboard"></i> <?= htmlspecialchars(\RuEdu\Engine\Lang::appName()) ?></h5>
         <ul class="nav flex-column">
             <?php foreach ($admin_menu ?? [] as $item): ?>
@@ -29,7 +29,7 @@
             <a href="<?= url('admin/logout') ?>" class="nav-link text-white-50"><i class="bi bi-box-arrow-right"></i> Выход</a>
         </div>
     </nav>
-    <main class="flex-fill p-4">
+    <main class="admin-main p-4">
         <?php if ($flash_success ?? false): ?>
             <div class="alert alert-success"><?= htmlspecialchars($flash_success) ?></div>
         <?php endif; ?>

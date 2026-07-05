@@ -9,6 +9,7 @@ use RuEdu\Engine\Database;
 use RuEdu\Engine\Auth;
 use RuEdu\Engine\Router;
 use RuEdu\Engine\Migrate;
+use RuEdu\Engine\Version;
 use RuEdu\Model\User;
 
 if (Config::isInstalled()) {
@@ -108,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'secret_key' => bin2hex(random_bytes(32)),
                         'cache_enabled' => true,
                         'scss_runtime' => false,
-                        'db_version' => RUEDU_VERSION,
+                        'db_version' => Version::getLatestMigrationVersion(),
                         'update_source' => null,
                     ];
 

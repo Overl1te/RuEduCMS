@@ -13,6 +13,8 @@ class Migrate
         }
 
         try {
+            Version::normalizeLegacyDbVersion();
+
             $db = Database::getInstance();
             $pdo = $db->pdo();
             $prefix = Config::dbPrefix();
@@ -52,17 +54,25 @@ class Migrate
 
     public static function tableExists(\PDO $pdo, string $table): bool
     {
-        $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
+        $stmt = $pdo->prepare(
+            'SELECT 1 FROM information_schema.tables
+             WHERE table_schema = DATABASE() AND table_name = ?
+             LIMIT 1'
+        );
         $stmt->execute([$table]);
 
-        return (bool) $stmt->fetch();
+        return (bool) $stmt->fetchColumn();
     }
 
     public static function columnExists(\PDO $pdo, string $table, string $column): bool
     {
-        $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
-        $stmt->execute([$column]);
+        $stmt = $pdo->prepare(
+            'SELECT 1 FROM information_schema.columns
+             WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?
+             LIMIT 1'
+        );
+        $stmt->execute([$table, $column]);
 
-        return (bool) $stmt->fetch();
+        return (bool) $stmt->fetchColumn();
     }
 }

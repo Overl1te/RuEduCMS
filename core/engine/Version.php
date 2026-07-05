@@ -8,14 +8,20 @@ class Version
 {
     private static ?string $version = null;
 
+    /** @var array<string, string> */
+    private const LEGACY_DB_VERSION_MAP = [
+        '1.0.0' => '0.0.0',
+        '1.0.1' => '0.0.1',
+    ];
+
     public static function get(): string
     {
         if (self::$version === null) {
             $file = ROOT_PATH . '/VERSION';
             if (is_file($file)) {
-                self::$version = trim((string) file_get_contents($file)) ?: '1.0.0';
+                self::$version = trim((string) file_get_contents($file)) ?: '0.0.1';
             } else {
-                self::$version = '1.0.0';
+                self::$version = '0.0.1';
             }
         }
 
@@ -24,7 +30,26 @@ class Version
 
     public static function getDbVersion(): string
     {
-        return (string) Config::get('db_version', '1.0.0');
+        return (string) Config::get('db_version', '0.0.0');
+    }
+
+    public static function normalizeLegacyDbVersion(): void
+    {
+        $current = self::getDbVersion();
+        if (isset(self::LEGACY_DB_VERSION_MAP[$current])) {
+            self::setDbVersion(self::LEGACY_DB_VERSION_MAP[$current]);
+        }
+    }
+
+    public static function getLatestMigrationVersion(): string
+    {
+        $migrations = self::getMigrationFiles();
+
+        if ($migrations === []) {
+            return self::get();
+        }
+
+        return (string) array_key_last($migrations);
     }
 
     public static function setDbVersion(string $version): void

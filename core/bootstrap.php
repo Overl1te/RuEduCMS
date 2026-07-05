@@ -13,7 +13,7 @@ define('ADMIN_PATH', ROOT_PATH . '/admin');
 define('STORAGE_PATH', ROOT_PATH . '/storage');
 
 $versionFile = ROOT_PATH . '/VERSION';
-define('RUEDU_VERSION', is_file($versionFile) ? (trim((string) file_get_contents($versionFile)) ?: '1.0.0') : '1.0.0');
+define('RUEDU_VERSION', is_file($versionFile) ? (trim((string) file_get_contents($versionFile)) ?: '0.0.1') : '0.0.1');
 
 spl_autoload_register(function (string $class): void {
     $prefix = 'RuEdu\\';
