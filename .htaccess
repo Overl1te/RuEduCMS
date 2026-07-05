@@ -1,0 +1,30 @@
+RewriteEngine On
+
+# Алиасы для пользовательского контента (чистые URL без content/)
+RewriteRule ^themes/(.*)$ content/themes/$1 [L]
+RewriteRule ^uploads/(.*)$ content/uploads/$1 [L]
+RewriteRule ^admin/assets/(.*)$ admin/assets/$1 [L]
+
+# Защита ядра и служебных папок
+RewriteRule ^core/ - [F,L]
+RewriteRule ^storage/ - [F,L]
+RewriteRule ^content/modules/ - [F,L]
+
+# Запрет прямого доступа к config.php
+RewriteRule ^config\.php$ - [F,L]
+
+# Статические файлы
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Установщик
+RewriteRule ^install(/.*)?$ install/index.php [L,QSA]
+
+# Админка
+RewriteRule ^admin(/.*)?$ admin/index.php [L,QSA]
+
+# Sitemap
+RewriteRule ^sitemap\.xml$ index.php?route=sitemap [L,QSA]
+
+# Публичные маршруты
+RewriteRule ^(.*)$ index.php [L,QSA]

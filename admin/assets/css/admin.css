@@ -1,0 +1,19 @@
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf1 100%);
+    padding: 24px;
+}
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    border: none;
+    border-radius: 12px;
+}
+.auth-links a:hover { color: #0d6efd !important; }
+.sidebar .nav-link.active { background: rgba(255,255,255,.1); border-radius: 6px; }
+.sidebar .nav-link { padding: 8px 12px; margin-bottom: 2px; }
+.sidebar .nav-link:hover { background: rgba(255,255,255,.05); border-radius: 6px; }
+table td { vertical-align: middle; }

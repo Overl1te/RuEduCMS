@@ -1,0 +1,107 @@
+<?php
+
+declare(strict_types=1);
+
+define('CORE_PATH', __DIR__);
+define('ROOT_PATH', dirname(__DIR__));
+define('CONTENT_PATH', ROOT_PATH . '/content');
+define('THEMES_PATH', CONTENT_PATH . '/themes');
+define('MODULES_PATH', CONTENT_PATH . '/modules');
+define('UPLOADS_PATH', CONTENT_PATH . '/uploads');
+define('LANGUAGES_PATH', CONTENT_PATH . '/languages');
+define('ADMIN_PATH', ROOT_PATH . '/admin');
+define('STORAGE_PATH', ROOT_PATH . '/storage');
+
+$versionFile = ROOT_PATH . '/VERSION';
+define('RUEDU_VERSION', is_file($versionFile) ? (trim((string) file_get_contents($versionFile)) ?: '1.0.0') : '1.0.0');
+
+spl_autoload_register(function (string $class): void {
+    $prefix = 'RuEdu\\';
+    $baseDir = CORE_PATH . '/';
+
+    if (!str_starts_with($class, $prefix)) {
+        return;
+    }
+
+    $relative = substr($class, strlen($prefix));
+    $file = $baseDir . str_replace('\\', '/', $relative) . '.php';
+
+    if (file_exists($file)) {
+        require_once $file;
+    }
+});
+
+date_default_timezone_set('Europe/Moscow');
+
+// Миграция: старый config/config.php → config.php в корне
+$legacyConfig = ROOT_PATH . '/config/config.php';
+if (!file_exists(ROOT_PATH . '/config.php') && file_exists($legacyConfig)) {
+    copy($legacyConfig, ROOT_PATH . '/config.php');
+}
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+\RuEdu\Engine\ErrorHandler::register();
+
+/**
+ * Подпись поля формы на русском языке.
+ */
+function field_label(string $key): string
+{
+    return \RuEdu\Engine\Lang::fieldLabel($key);
+}
+
+/**
+ * Публичный маршрут сайта (/sveden, /news) — для тем и меню.
+ */
+function route(string $path = ''): string
+{
+    return \RuEdu\Engine\Router::route($path);
+}
+
+/**
+ * Статический ресурс (uploads, themes, admin/assets).
+ */
+function asset(string $path = ''): string
+{
+    return \RuEdu\Engine\Router::asset($path);
+}
+
+/**
+ * @deprecated Используйте route() для страниц и asset() для файлов
+ */
+function url(string $path = ''): string
+{
+    return \RuEdu\Engine\Router::asset($path);
+}
+
+/**
+ * Рекурсивное удаление директории.
+ */
+function ruedu_delete_directory(string $dir): bool
+{
+    if (!is_dir($dir)) {
+        return false;
+    }
+
+    $items = scandir($dir);
+    if ($items === false) {
+        return false;
+    }
+
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') {
+            continue;
+        }
+        $path = $dir . DIRECTORY_SEPARATOR . $item;
+        if (is_dir($path)) {
+            ruedu_delete_directory($path);
+        } else {
+            unlink($path);
+        }
+    }
+
+    return rmdir($dir);
+}
