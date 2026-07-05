@@ -1,5 +1,31 @@
 <?php $title = 'Панель управления'; ?>
 <h2 class="mb-4">Панель управления</h2>
+<?php if (!empty($recommendations)): ?>
+<div class="card mb-4 border-warning">
+    <div class="card-header bg-warning-subtle d-flex align-items-center gap-2">
+        <i class="bi bi-lightbulb text-warning"></i>
+        <span class="fw-semibold">Рекомендации по настройке сайта</span>
+        <span class="badge bg-warning text-dark ms-auto"><?= count($recommendations) ?></span>
+    </div>
+    <div class="list-group list-group-flush">
+        <?php foreach ($recommendations as $rec): ?>
+            <div class="list-group-item d-flex align-items-start gap-3 py-3">
+                <div class="fs-4 text-primary lh-1 pt-1"><i class="bi <?= htmlspecialchars($rec['icon']) ?>"></i></div>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="fw-semibold"><?= htmlspecialchars($rec['title']) ?></div>
+                    <div class="text-muted small"><?= htmlspecialchars($rec['description']) ?></div>
+                    <?php if (!empty($rec['progress'])): ?>
+                        <div class="progress mt-2" style="height: 6px;">
+                            <div class="progress-bar bg-success" style="width: <?= (int) $rec['progress'] ?>%;"></div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <a href="<?= htmlspecialchars($rec['url']) ?>" class="btn btn-sm btn-outline-primary flex-shrink-0">Перейти</a>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+<?php endif; ?>
 <div class="row g-3 mb-4">
     <div class="col-md-3">
         <div class="card"><div class="card-body text-center">

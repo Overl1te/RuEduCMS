@@ -128,7 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ruedu_delete_directory(ROOT_PATH . '/install');
                     });
 
-                    Router::redirect('');
+                    Auth::attempt($adminLogin, $adminPass);
+                    \RuEdu\Engine\Session::flash('success', 'Установка завершена! Добро пожаловать в панель управления.');
+                    Router::redirect('admin/');
                 } catch (Exception $e) {
                     $errors[] = 'Ошибка завершения установки: ' . $e->getMessage();
                 }

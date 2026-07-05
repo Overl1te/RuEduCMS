@@ -15,6 +15,8 @@ use RuEdu\Engine\Updater;
 use RuEdu\Engine\Migrate;
 use RuEdu\Engine\Version;
 use RuEdu\Engine\ThemeEditor;
+use RuEdu\Engine\SetupRecommendations;
+use RuEdu\Engine\SystemPages;
 use RuEdu\Model\Page;
 use RuEdu\Model\Article;
 use RuEdu\Model\User;
@@ -188,7 +190,8 @@ $router->get('/', function () use ($admin) {
     ];
     $update = Updater::checkForUpdate();
     $needsDbUpdate = Version::needsDbUpdate();
-    $admin->render('dashboard/index', compact('stats', 'update', 'needsDbUpdate'));
+    $recommendations = SetupRecommendations::getAll();
+    $admin->render('dashboard/index', compact('stats', 'update', 'needsDbUpdate', 'recommendations'));
 });
 
 $router->get('', function () use ($admin) {
@@ -200,7 +203,9 @@ $router->get('', function () use ($admin) {
 $router->get('/pages', function () use ($admin) {
     Auth::requireAuth();
     $pages = Page::getAll();
-    $admin->render('pages/index', compact('pages'));
+    $systemPages = SystemPages::getAll();
+    $activeTheme = Config::get('theme', 'default-school');
+    $admin->render('pages/index', compact('pages', 'systemPages', 'activeTheme'));
 });
 
 $router->get('/pages/create', function () use ($admin) {
