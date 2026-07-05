@@ -8,7 +8,8 @@ class Router
 {
     private array $routes = [];
     private string $routePrefix = '';
-    private ?callable $notFoundHandler = null;
+    /** @var callable|null */
+    private mixed $notFoundHandler = null;
 
     public function __construct(string $routePrefix = '')
     {
