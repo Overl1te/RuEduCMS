@@ -72,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $siteUrl = Router::detectSiteUrl();
             }
             $basePath = Router::basePath();
-            $adminName = trim($_POST['admin_name'] ?? '');
             $adminLogin = Migrate::normalizeLogin(trim($_POST['admin_login'] ?? ''));
             $adminEmail = trim($_POST['admin_email'] ?? '');
             $adminPass = $_POST['admin_password'] ?? '';
@@ -120,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $now = date('Y-m-d H:i:s');
 
                     $stmt = $pdo->prepare("INSERT INTO {$prefix}users (name, login, email, password, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, 'admin', 'active', ?, ?)");
-                    $stmt->execute([$adminName, $adminLogin, $adminEmail, Auth::hashPassword($adminPass), $now, $now]);
+                    $stmt->execute([$adminLogin, $adminLogin, $adminEmail, Auth::hashPassword($adminPass), $now, $now]);
 
                     unset($_SESSION['install_db']);
 

@@ -13,7 +13,7 @@ class User
     {
         $db = Database::getInstance();
         return $db->fetchAll(
-            "SELECT id, name, login, email, role, status, last_login, created_at FROM " . $db->table('users') . " ORDER BY name"
+            "SELECT id, name, login, email, role, status, last_login, created_at FROM " . $db->table('users') . " ORDER BY login"
         );
     }
 
@@ -45,9 +45,11 @@ class User
         $db = Database::getInstance();
         $now = date('Y-m-d H:i:s');
 
+        $login = $data['login'];
+
         return $db->insert('users', [
-            'name' => $data['name'],
-            'login' => $data['login'],
+            'name' => $data['name'] ?? $login,
+            'login' => $login,
             'email' => $data['email'],
             'password' => $data['password'],
             'role' => $data['role'] ?? 'author',

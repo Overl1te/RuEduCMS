@@ -73,6 +73,20 @@ body {
 /* Page content */
 .main-content { min-height: 50vh; padding: 32px 0; }
 .page-content h1 { margin-bottom: 20px; font-size: 1.8em; }
+.page-content .btn-primary { background: var(--primary); color: #fff; }
+.page-content .btn-primary:hover { background: var(--primary-dark); }
+
+/* 404 */
+.error-page { padding: 64px 0 80px; text-align: center; }
+.error-page-inner { max-width: 560px; margin: 0 auto; }
+.error-code { font-size: 6rem; font-weight: 700; line-height: 1; color: var(--primary); opacity: .15; margin-bottom: -24px; }
+.error-page h1 { font-size: 2rem; margin-bottom: 12px; }
+.error-text { color: var(--text-light); margin-bottom: 28px; }
+.error-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.error-page .btn-primary { background: var(--primary); color: #fff; }
+.error-page .btn-primary:hover { background: var(--primary-dark); }
+.error-page .btn-outline { color: var(--primary); border-color: var(--primary); }
+.error-page .btn-outline:hover { background: var(--primary); color: #fff; }
 .content-body { line-height: 1.8; }
 .content-body img { max-width: 100%; height: auto; border-radius: var(--radius); }
 .content-body table { width: 100%; border-collapse: collapse; margin: 16px 0; }
@@ -166,6 +180,8 @@ body.a11y-dark { --text: #f3f4f6; --bg: #111827; --bg-alt: #1f2937; --border: #3
     .main-nav.open { display: block; }
     .nav-list { flex-direction: column; }
     .hero h1 { font-size: 1.6em; }
+    .error-code { font-size: 4.5rem; }
+    .error-page h1 { font-size: 1.5rem; }
     .sveden-nav ul { columns: 1; }
     .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
     .cookie-banner .container { flex-direction: column; text-align: center; }

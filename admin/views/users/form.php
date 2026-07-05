@@ -6,13 +6,9 @@
     <div class="row">
         <div class="col-md-6">
             <div class="mb-3">
-                <label class="form-label">Имя</label>
-                <input type="text" name="name" class="form-control" required value="<?= htmlspecialchars($editUser['name'] ?? '') ?>">
-            </div>
-            <div class="mb-3">
                 <label class="form-label">Логин</label>
                 <input type="text" name="login" class="form-control" required pattern="[a-zA-Z0-9._-]+"
-                       value="<?= htmlspecialchars($editUser['login'] ?? '') ?>" autocomplete="username">
+                       value="<?= htmlspecialchars($editUser['login'] ?? $editUser['name'] ?? '') ?>" autocomplete="username">
                 <div class="form-text">Латиница, цифры, точка, дефис, подчёркивание</div>
             </div>
             <div class="mb-3">

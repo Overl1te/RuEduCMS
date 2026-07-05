@@ -116,12 +116,8 @@
                 </div>
                 <hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb;">
                 <div class="form-group">
-                    <label>Имя администратора</label>
-                    <input type="text" name="admin_name" required>
-                </div>
-                <div class="form-group">
                     <label>Логин администратора</label>
-                    <input type="text" name="admin_login" required pattern="[a-zA-Z0-9._-]+" placeholder="администратор">
+                    <input type="text" name="admin_login" required pattern="[a-zA-Z0-9._-]+" placeholder="admin">
                     <small style="color:#6b7280;">Латиница, цифры, точка, дефис, подчёркивание</small>
                 </div>
                 <div class="form-group">

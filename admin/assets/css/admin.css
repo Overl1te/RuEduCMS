@@ -17,3 +17,5 @@
 .sidebar .nav-link { padding: 8px 12px; margin-bottom: 2px; }
 .sidebar .nav-link:hover { background: rgba(255,255,255,.05); border-radius: 6px; }
 table td { vertical-align: middle; }
+.theme-file-list { max-height: 70vh; overflow-y: auto; }
+.theme-editor .CodeMirror { font-size: 13px; border-radius: 0 0 0.375rem 0.375rem; }

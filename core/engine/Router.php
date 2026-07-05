@@ -8,6 +8,7 @@ class Router
 {
     private array $routes = [];
     private string $routePrefix = '';
+    private ?callable $notFoundHandler = null;
 
     public function __construct(string $routePrefix = '')
     {
@@ -39,6 +40,13 @@ class Router
         return $this;
     }
 
+    public function setNotFoundHandler(callable $handler): self
+    {
+        $this->notFoundHandler = $handler;
+
+        return $this;
+    }
+
     public function dispatch(string $method, string $uri): void
     {
         $uri = parse_url($uri, PHP_URL_PATH) ?? '/';
@@ -61,6 +69,12 @@ class Router
         }
 
         http_response_code(404);
+
+        if ($this->notFoundHandler !== null) {
+            call_user_func($this->notFoundHandler);
+            return;
+        }
+
         echo 'Страница не найдена';
     }
 

@@ -92,7 +92,7 @@ class Auth
         $resetUrl = Router::url('admin/reset-password?token=' . $token);
         $siteName = Config::get('site_name', Lang::APP_NAME);
         $subject = 'Восстановление пароля — ' . $siteName;
-        $body = "Здравствуйте, {$user['name']}!\n\n"
+        $body = "Здравствуйте, " . ($user['login'] ?? $user['name']) . "!\n\n"
             . "Для сброса пароля перейдите по ссылке (действует 1 час):\n{$resetUrl}\n\n"
             . "Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо.\n\n"
             . "— {$siteName}";

@@ -34,6 +34,19 @@ Hook::loadModules();
 $router = new Router(Router::basePath());
 $template = new Template();
 
+$render404 = function () use ($template): void {
+    http_response_code(404);
+    echo $template->setData([
+        'menu' => Menu::getByLocation('main'),
+        'site_name' => Config::get('site_name'),
+        'meta' => SEO::metaTags([
+            'title' => 'Страница не найдена — ' . Config::get('site_name'),
+        ]),
+    ])->render('404');
+};
+
+$router->setNotFoundHandler($render404);
+
 // Sitemap
 $router->get('/sitemap.xml', function () {
     header('Content-Type: application/xml; charset=utf-8');
@@ -69,8 +82,7 @@ $router->get('/', function () use ($template) {
 $router->get('/page/{slug}', function (array $params) use ($template) {
     $page = Page::getBySlug($params['slug']);
     if (!$page) {
-        http_response_code(404);
-        echo $template->render('404');
+        $render404();
         return;
     }
 
@@ -97,8 +109,7 @@ $router->get('/news', function () use ($template) {
 $router->get('/news/{slug}', function (array $params) use ($template) {
     $article = Article::getBySlug($params['slug']);
     if (!$article) {
-        http_response_code(404);
-        echo $template->render('404');
+        $render404();
         return;
     }
 

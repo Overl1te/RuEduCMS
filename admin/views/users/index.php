@@ -4,12 +4,11 @@
     <a href="<?= url('admin/users/create') ?>" class="btn btn-primary"><i class="bi bi-plus"></i> Добавить</a>
 </div>
 <table class="table table-hover">
-    <thead><tr><th>Имя</th><th>Логин</th><th>Email</th><th>Роль</th><th>Статус</th><th></th></tr></thead>
+    <thead><tr><th>Логин</th><th>Email</th><th>Роль</th><th>Статус</th><th></th></tr></thead>
     <tbody>
         <?php foreach ($users as $u): ?>
         <tr>
-            <td><?= htmlspecialchars($u['name']) ?></td>
-            <td><code><?= htmlspecialchars($u['login'] ?? '') ?></code></td>
+            <td><code><?= htmlspecialchars($u['login'] ?? $u['name']) ?></code></td>
             <td><?= htmlspecialchars($u['email']) ?></td>
             <td><span class="badge bg-info"><?= \RuEdu\Engine\Lang::role($u['role']) ?></span></td>
             <td><span class="badge bg-<?= $u['status'] === 'active' ? 'success' : 'secondary' ?>"><?= \RuEdu\Engine\Lang::userStatus($u['status']) ?></span></td>

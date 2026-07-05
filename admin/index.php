@@ -14,6 +14,7 @@ use RuEdu\Engine\Cache;
 use RuEdu\Engine\Updater;
 use RuEdu\Engine\Migrate;
 use RuEdu\Engine\Version;
+use RuEdu\Engine\ThemeEditor;
 use RuEdu\Model\Page;
 use RuEdu\Model\Article;
 use RuEdu\Model\User;
@@ -403,7 +404,7 @@ $router->post('/users/save', function () {
     }
 
     $data = [
-        'name' => trim($_POST['name'] ?? ''),
+        'name' => $login,
         'login' => $login,
         'email' => trim($_POST['email'] ?? ''),
         'role' => $_POST['role'] ?? 'author',
@@ -530,6 +531,69 @@ $router->post('/updates/backup', function () {
         Session::flash('error', 'Не удалось создать резервную копию');
     }
     Router::redirect('admin/updates');
+});
+
+// Themes editor
+$router->get('/themes', function () use ($admin) {
+    Auth::requireAdmin();
+    $themes = \RuEdu\Engine\Template::getThemes();
+    $admin->render('themes/index', compact('themes'));
+});
+
+$router->get('/themes/edit/{slug}', function (array $p) use ($admin) {
+    Auth::requireAdmin();
+
+    $slug = $p['slug'] ?? '';
+    if (ThemeEditor::getThemeRoot($slug) === null) {
+        Session::flash('error', 'Тема не найдена');
+        Router::redirect('admin/themes');
+    }
+
+    $themes = \RuEdu\Engine\Template::getThemes();
+    $theme = null;
+    foreach ($themes as $t) {
+        if (($t['slug'] ?? '') === $slug) {
+            $theme = $t;
+            break;
+        }
+    }
+    $theme ??= ['slug' => $slug, 'name' => $slug];
+
+    $files = ThemeEditor::listEditableFiles($slug);
+    $requestedFile = isset($_GET['file']) ? (string) $_GET['file'] : '';
+    $currentFile = $requestedFile !== '' && in_array($requestedFile, $files, true)
+        ? $requestedFile
+        : ThemeEditor::defaultFile($slug);
+
+    $fileData = $currentFile ? ThemeEditor::readFile($slug, $currentFile) : null;
+
+    $admin->render('themes/edit', compact('slug', 'theme', 'files', 'currentFile', 'fileData'));
+});
+
+$router->post('/themes/save', function () {
+    Auth::requireAdmin();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/themes');
+    }
+
+    $slug = trim($_POST['slug'] ?? '');
+    $file = trim($_POST['file'] ?? '');
+    $content = $_POST['content'] ?? '';
+
+    if (ThemeEditor::getThemeRoot($slug) === null) {
+        Session::flash('error', 'Тема не найдена');
+        Router::redirect('admin/themes');
+    }
+
+    $result = ThemeEditor::writeFile($slug, $file, $content);
+    if ($result !== true) {
+        Session::flash('error', $result);
+        Router::redirect('admin/themes/edit/' . rawurlencode($slug) . '?file=' . rawurlencode($file));
+    }
+
+    Cache::flush();
+    Session::flash('success', 'Файл сохранён: ' . $file);
+    Router::redirect('admin/themes/edit/' . rawurlencode($slug) . '?file=' . rawurlencode($file));
 });
 
 // Settings

@@ -103,7 +103,7 @@
         </div>
         <div class="ruedu-admin-bar__right">
             <span class="ruedu-admin-bar__user">
-                <?= htmlspecialchars($user['name']) ?>
+                <?= htmlspecialchars($user['login'] ?? $user['name']) ?>
                 (<?= htmlspecialchars(\RuEdu\Engine\AdminBar::roleLabel($user['role'])) ?>)
             </span>
             <a class="ruedu-admin-bar__link" href="<?= htmlspecialchars(\RuEdu\Engine\Router::path('admin/logout')) ?>">
