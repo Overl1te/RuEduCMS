@@ -10,6 +10,7 @@ use RuEdu\Engine\Auth;
 use RuEdu\Engine\Router;
 use RuEdu\Engine\Migrate;
 use RuEdu\Engine\Version;
+use RuEdu\Engine\SiteStructure;
 use RuEdu\Model\User;
 
 if (Config::isInstalled()) {
@@ -57,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $pdo->exec($stmt);
                     }
                 }
+                SiteStructure::seed($pdo, $dbConfig['prefix'], true);
                 header('Location: ?step=4');
                 exit;
             } catch (Exception $e) {
@@ -110,6 +112,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($config['secret_key'] === '') {
                         $config['secret_key'] = bin2hex(random_bytes(32));
                     }
+
+                    $config['seo_indexing'] = true;
+                    $config['indexnow_key'] = bin2hex(random_bytes(16));
 
                     Config::save($config);
 

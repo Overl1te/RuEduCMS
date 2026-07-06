@@ -14,6 +14,8 @@ use RuEdu\Engine\Hook;
 use RuEdu\Engine\SEO;
 use RuEdu\Engine\Cache;
 use RuEdu\Engine\Migrate;
+use RuEdu\Engine\SearchIndexer;
+use RuEdu\Engine\SiteStructure;
 use RuEdu\Model\Page;
 use RuEdu\Model\Article;
 use RuEdu\Model\Menu;
@@ -32,6 +34,7 @@ if (!Config::isInstalled()) {
 Config::load();
 date_default_timezone_set(Config::get('timezone', 'Europe/Moscow'));
 Migrate::run();
+SearchIndexer::ensureSetup();
 
 Hook::loadModules();
 
@@ -44,10 +47,32 @@ $render404 = function (): void {
 
 $router->setNotFoundHandler($render404);
 
-// Sitemap
+// SEO: robots.txt, IndexNow, sitemap
+$router->get('/robots.txt', function () {
+    header('Content-Type: text/plain; charset=utf-8');
+    echo SEO::generateRobotsTxt();
+});
+
+$router->get('/indexnow-key.txt', function () {
+    SearchIndexer::serveKeyFile();
+});
+
 $router->get('/sitemap.xml', function () {
     header('Content-Type: application/xml; charset=utf-8');
     echo SEO::generateSitemap();
+});
+
+$router->get('/sitemap', function () use ($template) {
+    echo $template->setData([
+        'menu' => Menu::getByLocation('main'),
+        'sitemap_tree' => SiteStructure::sitemapTree(),
+        'sections' => SEO::getSitemapSections(),
+        'meta' => SEO::metaTags([
+            'title' => 'Карта сайта — ' . Config::get('site_name'),
+            'description' => 'Полный список страниц и разделов сайта ' . Config::get('site_name'),
+            'canonical' => Router::url('sitemap'),
+        ]),
+    ])->render('sitemap');
 });
 
 // Главная
@@ -61,6 +86,7 @@ $router->get('/', function () use ($template) {
 
         $html = $template->setData([
             'menu' => $menu,
+            'side_menu' => [],
             'articles' => $articles,
             'site_name' => Config::get('site_name'),
             'meta' => SEO::metaTags(['title' => Config::get('site_name')]),
@@ -89,6 +115,8 @@ $router->get('/page/{slug}', function (array $params) use ($template) {
         'meta' => SEO::metaTags([
             'title' => $page['meta_title'] ?: $page['title'],
             'description' => $page['meta_description'] ?? '',
+            'content' => $page['content'] ?? '',
+            'url' => Router::url('page/' . $page['slug']),
         ]),
     ])->render('page');
 });
@@ -99,7 +127,10 @@ $router->get('/news', function () use ($template) {
     echo $template->setData([
         'articles' => $articles,
         'menu' => Menu::getByLocation('main'),
-        'meta' => SEO::metaTags(['title' => 'Новости — ' . Config::get('site_name')]),
+        'meta' => SEO::metaTags([
+            'title' => 'Новости — ' . Config::get('site_name'),
+            'url' => Router::url('news'),
+        ]),
     ])->render('news-list');
 });
 
@@ -116,8 +147,11 @@ $router->get('/news/{slug}', function (array $params) use ($template) {
         'meta' => SEO::metaTags([
             'title' => $article['meta_title'] ?: $article['title'],
             'description' => $article['meta_description'] ?? $article['excerpt'] ?? '',
+            'content' => $article['content'] ?? '',
             'type' => 'article',
+            'url' => Router::url('news/' . $article['slug']),
         ]),
+        'schema' => SEO::schemaNewsArticle($article),
     ])->render('news-detail');
 });
 

@@ -43,21 +43,21 @@
             <p class="section-subtitle">Основные разделы сайта</p>
         </div>
         <div class="links-grid">
-            <a href="<?= route('staff') ?>" class="link-card">
-                <span class="link-icon link-icon-staff" aria-hidden="true"></span>
-                <span class="link-label">Педагогический состав</span>
+            <a href="<?= route('page/informaciya') ?>" class="link-card">
+                <span class="link-icon link-icon-docs" aria-hidden="true"></span>
+                <span class="link-label">Информация</span>
             </a>
             <a href="<?= route('schedule') ?>" class="link-card">
                 <span class="link-icon link-icon-schedule" aria-hidden="true"></span>
                 <span class="link-label">Расписание</span>
             </a>
-            <a href="<?= route('documents') ?>" class="link-card">
-                <span class="link-icon link-icon-docs" aria-hidden="true"></span>
-                <span class="link-label">Документы</span>
+            <a href="<?= route('page/priem-v-shkolu') ?>" class="link-card">
+                <span class="link-icon link-icon-staff" aria-hidden="true"></span>
+                <span class="link-label">Приём в школу</span>
             </a>
             <a href="<?= route('gallery') ?>" class="link-card">
                 <span class="link-icon link-icon-gallery" aria-hidden="true"></span>
-                <span class="link-label">Галерея</span>
+                <span class="link-label">Фотоальбомы</span>
             </a>
         </div>
     </div>

@@ -69,6 +69,7 @@ class ErrorPage
                     'error_message' => $message,
                     'meta' => SEO::metaTags([
                         'title' => $title . ' — ' . Config::get('site_name'),
+                        'robots' => 'noindex, nofollow',
                     ]),
                 ])->render($templateName);
             } catch (\Throwable) {

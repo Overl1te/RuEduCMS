@@ -61,6 +61,18 @@ $s = $settings;
                     <textarea name="cookie_text" class="form-control" rows="2"><?= htmlspecialchars($s['cookie_text'] ?? 'Данный сайт использует cookie-файлы для улучшения работы.') ?></textarea>
                 </div>
             </div></div>
+            <div class="card mb-3"><div class="card-header">Поисковые системы</div><div class="card-body">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="seo_indexing" value="1"
+                        <?= (Config::get('seo_indexing', true)) ? 'checked' : '' ?>>
+                    <label class="form-check-label">Разрешить индексацию сайта</label>
+                </div>
+                <p class="form-text mb-0">
+                    При публикации контента CMS автоматически уведомляет Яндекс, Bing и другие системы (IndexNow).
+                    Карта сайта: <a href="<?= route('sitemap.xml') ?>" target="_blank">sitemap.xml</a>,
+                    RSS: <a href="<?= route('news/rss') ?>" target="_blank">новости</a>.
+                </p>
+            </div></div>
             <div class="card mb-3"><div class="card-header">Производительность</div><div class="card-body">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="cache_enabled" value="1" <?= ($s['cache_enabled'] ?? '1') ? 'checked' : '' ?>>

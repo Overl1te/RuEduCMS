@@ -514,6 +514,80 @@ a { color: var(--primary); }
 /* ── Page content ── */
 .main-content { min-height: 50vh; }
 
+.page-layout {
+    display: block;
+}
+
+.page-layout.has-sidebar {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 32px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.page-layout.has-sidebar .main-content {
+    min-width: 0;
+}
+
+.site-sidebar {
+    padding: 32px 0 48px;
+}
+
+.side-nav {
+    position: sticky;
+    top: 16px;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 16px 0;
+}
+
+.side-nav-title {
+    margin: 0 16px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-light);
+}
+
+.side-nav-list,
+.side-nav-sublist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.side-nav-item a {
+    display: block;
+    padding: 9px 16px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.35;
+    transition: background var(--transition), color var(--transition), padding-left var(--transition);
+}
+
+.side-nav-item a:hover {
+    background: var(--bg-alt);
+    color: var(--primary);
+    padding-left: 20px;
+}
+
+.side-nav-sublist .side-nav-item a {
+    padding-left: 28px;
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+.side-nav-sublist .side-nav-item a:hover {
+    padding-left: 32px;
+    color: var(--primary);
+}
+
 .page-content {
     padding: 48px 0 64px;
 }
@@ -621,6 +695,121 @@ a { color: var(--primary); }
 }
 
 .content-body tr:nth-child(even) td { background: var(--bg-alt); }
+
+/* ── Sitemap ── */
+.sitemap-intro {
+    margin: -8px 0 32px;
+    color: var(--text-light);
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.sitemap-intro a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.sitemap-intro a:hover { text-decoration: underline; }
+
+.sitemap-tree-wrap {
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: var(--bg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px 24px;
+}
+
+.sitemap-tree {
+    list-style: none;
+    margin: 0;
+    padding-left: 0;
+}
+
+.sitemap-tree .sitemap-tree {
+    margin-top: 6px;
+    margin-left: 18px;
+    padding-left: 14px;
+    border-left: 2px solid var(--border-light);
+}
+
+.sitemap-tree-item {
+    margin: 0;
+    padding: 6px 0;
+}
+
+.sitemap-tree-item > a,
+.sitemap-tree-label {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
+.sitemap-tree-item > a:hover {
+    color: var(--primary);
+}
+
+.sitemap-tree-label {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.sitemap-sections {
+    display: grid;
+    gap: 36px;
+}
+
+.sitemap-section h2 {
+    margin-bottom: 16px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.sitemap-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg);
+    box-shadow: var(--shadow-sm);
+}
+
+.sitemap-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-light);
+    transition: background var(--transition), padding-left var(--transition);
+}
+
+.sitemap-item:last-child { border-bottom: none; }
+
+.sitemap-item:hover {
+    background: var(--bg-alt);
+    padding-left: 22px;
+}
+
+.sitemap-item a {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition);
+}
+
+.sitemap-item a:hover { color: var(--primary); }
+
+.sitemap-date {
+    flex-shrink: 0;
+    font-size: 13px;
+    color: var(--text-light);
+    font-weight: 500;
+}
 
 /* ── News list ── */
 .news-list .news-item {
@@ -1106,6 +1295,20 @@ body.a11y-dark {
     .doc-list li {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .page-layout.has-sidebar {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: 0 16px;
+    }
+
+    .site-sidebar {
+        padding: 16px 0 0;
+    }
+
+    .side-nav {
+        position: static;
     }
 }
 

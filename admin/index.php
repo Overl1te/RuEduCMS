@@ -18,6 +18,7 @@ use RuEdu\Engine\Version;
 use RuEdu\Engine\ThemeEditor;
 use RuEdu\Engine\SetupRecommendations;
 use RuEdu\Engine\SystemPages;
+use RuEdu\Engine\SearchIndexer;
 use RuEdu\Model\Page;
 use RuEdu\Model\Article;
 use RuEdu\Model\User;
@@ -34,6 +35,7 @@ if (!Config::isInstalled()) {
 
 Config::load();
 Migrate::run();
+SearchIndexer::ensureSetup();
 Hook::loadModules();
 
 $router = new Router(Router::basePath() . '/admin');
@@ -241,8 +243,12 @@ $router->post('/pages/save', function () {
     if ($id) {
         Page::update($id, $data);
     } else {
-        Page::create($data);
+        $id = Page::create($data);
+        $data['id'] = $id;
     }
+
+    SearchIndexer::onContentPublished('page', $data);
+    Hook::fire('content_published', ['type' => 'page', 'data' => $data]);
 
     Cache::flush();
     Session::flash('success', 'Страница сохранена');
@@ -304,8 +310,12 @@ $router->post('/articles/save', function () {
     if ($id) {
         Article::update($id, $data);
     } else {
-        Article::create($data);
+        $id = Article::create($data);
+        $data['id'] = $id;
     }
+
+    SearchIndexer::onContentPublished('article', $data);
+    Hook::fire('content_published', ['type' => 'article', 'data' => $data]);
 
     Cache::flush();
     Session::flash('success', 'Статья сохранена');
@@ -628,6 +638,7 @@ $router->post('/settings/save', function () {
     $config['base_path'] = Router::basePath();
     $config['theme'] = trim($_POST['theme'] ?? $config['theme']);
     $config['admin_email'] = trim($_POST['admin_email'] ?? $config['admin_email']);
+    $config['seo_indexing'] = isset($_POST['seo_indexing']);
     Config::save($config);
 
     Cache::flush();

@@ -77,7 +77,7 @@ class SystemPages
             ],
             [
                 'id' => 'sveden',
-                'title' => 'Сведения об ОО',
+                'title' => 'Сведения об образовательной организации',
                 'url' => '/sveden',
                 'template' => 'templates/sveden.php',
                 'module' => 'sveden',
@@ -122,7 +122,7 @@ class SystemPages
             ],
             [
                 'id' => 'gallery',
-                'title' => 'Галерея',
+                'title' => 'Фотоальбомы',
                 'url' => '/gallery',
                 'template' => 'templates/gallery.php',
                 'module' => 'gallery',

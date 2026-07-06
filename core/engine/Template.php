@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace RuEdu\Engine;
 
+use RuEdu\Model\Menu;
+
 class Template
 {
     private string $themePath;
@@ -29,7 +31,7 @@ class Template
 
     public function render(string $template, array $data = []): string
     {
-        $data = array_merge($this->data, $data);
+        $data = array_merge($this->defaultData(), $this->data, $data);
         $tpl = $this;
         extract($data, EXTR_SKIP);
 
@@ -65,6 +67,24 @@ class Template
             return Router::asset('core/scss.php?theme=' . basename($this->themePath));
         }
         return $this->asset('css/main.css');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function defaultData(): array
+    {
+        $data = [];
+
+        if (!array_key_exists('side_menu', $this->data)) {
+            try {
+                $data['side_menu'] = Menu::getByLocation('side');
+            } catch (\Throwable) {
+                $data['side_menu'] = [];
+            }
+        }
+
+        return $data;
     }
 
     public static function getThemes(): array

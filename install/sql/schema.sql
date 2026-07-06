@@ -227,18 +227,10 @@ INSERT INTO `{{prefix}}modules` (`name`, `title`, `description`, `enabled`, `cre
 ('contacts', 'Контакты', 'Контактная информация и карта', 1, NOW()),
 ('forms', 'Формы', 'Конструктор форм обратной связи', 1, NOW());
 
--- Главное меню
-INSERT INTO `{{prefix}}menus` (`name`, `location`, `created_at`) VALUES ('Главное меню', 'main', NOW());
-
-INSERT INTO `{{prefix}}menu_items` (`menu_id`, `title`, `url`, `sort_order`) VALUES
-(1, 'Главная', '/', 1),
-(1, 'Сведения об ОО', '/sveden', 2),
-(1, 'Новости', '/news', 3),
-(1, 'Педагогический состав', '/staff', 4),
-(1, 'Расписание', '/schedule', 5),
-(1, 'Документы', '/documents', 6),
-(1, 'Галерея', '/gallery', 7),
-(1, 'Контакты', '/contacts', 8);
+-- Главное и боковое меню (пункты заполняются при установке через SiteStructure)
+INSERT INTO `{{prefix}}menus` (`name`, `location`, `created_at`) VALUES
+('Главное меню', 'main', NOW()),
+('Боковое меню', 'side', NOW());
 
 -- Категории новостей
 INSERT INTO `{{prefix}}article_categories` (`name`, `slug`, `sort_order`) VALUES

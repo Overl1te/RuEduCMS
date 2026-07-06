@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?= $meta ?? '' ?>
+    <?= \RuEdu\Engine\SEO::headLinks() ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,9 +17,12 @@
         'article' => $article ?? null,
     ]) ?>
     <?php include __DIR__ . '/partials/header.php'; ?>
-    <main class="main-content">
-        <?= $content ?? '' ?>
-    </main>
+    <div class="page-layout<?= !empty($side_menu) ? ' has-sidebar' : '' ?>">
+        <?php include __DIR__ . '/partials/sidebar.php'; ?>
+        <main class="main-content">
+            <?= $content ?? '' ?>
+        </main>
+    </div>
     <?php include __DIR__ . '/partials/footer.php'; ?>
     <?php include __DIR__ . '/partials/a11y.php'; ?>
     <?php include __DIR__ . '/partials/cookie-banner.php'; ?>

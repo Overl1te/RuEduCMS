@@ -9,10 +9,22 @@ class Config
     private static ?array $data = null;
     private static string $configFile = '';
 
-    /** Базовые значения для нового config.php */
-    public static function defaults(): array
+    /** Параметры, задаваемые только вручную в config.php */
+    public static function manualDefaults(): array
     {
         return [
+            'timezone' => 'Europe/Moscow',
+            'language' => 'ru',
+            'debug' => false,
+            'scss_runtime' => false,
+            'update_source' => null,
+        ];
+    }
+
+    /** Полный набор значений по умолчанию (установщик, админка, код) */
+    public static function defaults(): array
+    {
+        return array_merge(self::manualDefaults(), [
             'db_host' => 'localhost',
             'db_name' => '',
             'db_user' => '',
@@ -23,17 +35,14 @@ class Config
             'site_name' => 'Мой сайт',
             'site_description' => 'Сайт образовательного учреждения',
             'admin_email' => '',
-            'timezone' => 'Europe/Moscow',
             'theme' => 'default-school',
-            'language' => 'ru',
-            'debug' => false,
             'installed' => false,
             'secret_key' => '',
             'cache_enabled' => true,
-            'scss_runtime' => false,
             'db_version' => '0.0.1',
-            'update_source' => null,
-        ];
+            'seo_indexing' => true,
+            'indexnow_key' => '',
+        ]);
     }
 
     public static function ensureFileExists(): bool
@@ -41,7 +50,7 @@ class Config
         if (file_exists(self::configFile())) {
             return true;
         }
-        return self::save(self::defaults());
+        return self::save(self::manualDefaults());
     }
 
     private static function configFile(): string
@@ -58,12 +67,8 @@ class Config
             return self::$data;
         }
 
-        if (!file_exists(self::configFile())) {
-            self::$data = [];
-            return self::$data;
-        }
-
-        self::$data = require self::configFile();
+        $file = file_exists(self::configFile()) ? require self::configFile() : [];
+        self::$data = array_merge(self::defaults(), is_array($file) ? $file : []);
         return self::$data;
     }
 

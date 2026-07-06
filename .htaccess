@@ -1,10 +1,9 @@
 RewriteEngine On
 Options -Indexes
 
-# Кастомные страницы ошибок (вместо стандартных Apache)
+# Кастомные страницы ошибок (403 — через error.php?code=403 в RewriteRule)
 ErrorDocument 400 error.php
 ErrorDocument 401 error.php
-ErrorDocument 403 error.php
 ErrorDocument 404 error.php
 ErrorDocument 500 error.php
 ErrorDocument 503 error.php
@@ -15,15 +14,16 @@ RewriteRule ^uploads/(.*)$ content/uploads/$1 [L]
 RewriteRule ^admin/assets/(.*)$ admin/assets/$1 [L]
 
 # Защита ядра и служебных папок
-RewriteRule ^config(/.*)?$ - [F,L]
-RewriteRule ^core(/.*)?$ - [F,L]
-RewriteRule ^storage(/.*)?$ - [F,L]
-RewriteRule ^content/modules(/.*)?$ - [F,L]
+RewriteRule ^config(/.*)?$ error.php?code=403 [L,QSA]
+RewriteRule ^core(/.*)?$ error.php?code=403 [L,QSA]
+RewriteRule ^storage(/.*)?$ error.php?code=403 [L,QSA]
+RewriteRule ^content/modules(/.*)?$ error.php?code=403 [L,QSA]
 
 # Запрет прямого доступа к config.php
-RewriteRule ^config\.php$ - [F,L]
+RewriteRule ^config\.php$ error.php?code=403 [L,QSA]
 
-# Статические файлы
+# Статические файлы (кроме robots.txt — генерируется CMS)
+RewriteCond %{REQUEST_URI} !robots\.txt$ [NC]
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 

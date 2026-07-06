@@ -12,6 +12,17 @@ server {
         try_files $uri $uri/ /index.php?$is_args$args;
     }
 
+    # Служебные папки — только через PHP include, не по HTTP
+    location ~ ^/(core|storage|config|content/modules)(/|$) {
+        deny all;
+        return 403;
+    }
+
+    location = /config.php {
+        deny all;
+        return 403;
+    }
+
     location ~ \.php$ {
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;

@@ -1,9 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /install/
-Disallow: /core/
-Disallow: /storage/
-Disallow: /content/modules/
-
-Sitemap: /sitemap.xml

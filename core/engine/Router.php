@@ -190,4 +190,22 @@ class Router
 
         return $scheme . '://' . $host . ($base !== '' ? $base : '');
     }
+
+    /**
+     * Абсолютный URL текущей страницы (для canonical, Open Graph).
+     */
+    public static function currentUrl(): string
+    {
+        $path = parse_url(self::getUri(), PHP_URL_PATH) ?? '/';
+        $siteUrl = class_exists(Config::class) ? Config::get('site_url', '') : '';
+
+        if ($siteUrl) {
+            return rtrim((string) $siteUrl, '/') . ($path !== '/' ? $path : '');
+        }
+
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+        return $scheme . '://' . $host . $path;
+    }
 }
