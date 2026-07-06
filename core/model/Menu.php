@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace RuEdu\Model;
 
 use RuEdu\Engine\Database;
+use RuEdu\Engine\Modules;
 
 class Menu
 {
@@ -44,7 +45,7 @@ class Menu
             $item['children'] = self::getItems($menuId, (int) $item['id']);
         }
 
-        return $items;
+        return Modules::filterMenuItems($items);
     }
 
     private static function normalizeUrl(string $url): string

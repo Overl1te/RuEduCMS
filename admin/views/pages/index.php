@@ -1,5 +1,6 @@
 <?php
 use RuEdu\Engine\Auth;
+use RuEdu\Engine\Modules;
 
 $title = 'Страницы';
 ?>
@@ -57,12 +58,29 @@ $title = 'Страницы';
     <thead><tr><th>Название</th><th>URL</th><th>Статус</th><th>Дата</th><th></th></tr></thead>
     <tbody>
     <?php foreach ($pages as $p): ?>
+        <?php $isSection = Modules::exists(Modules::sectionName((string) $p['slug'])); ?>
         <tr>
-            <td><?= htmlspecialchars($p['title']) ?></td>
+            <td>
+                <?= htmlspecialchars($p['title']) ?>
+                <?php if ($isSection): ?>
+                    <span class="badge bg-info text-dark ms-1">Раздел</span>
+                <?php endif; ?>
+            </td>
             <td><code>/page/<?= htmlspecialchars($p['slug']) ?></code></td>
-            <td><span class="badge bg-<?= $p['status'] === 'published' ? 'success' : 'secondary' ?>"><?= \RuEdu\Engine\Lang::publishStatus($p['status']) ?></span></td>
+            <td>
+                <?php if ($isSection && !Modules::isPageEnabled((string) $p['slug'])): ?>
+                    <span class="badge bg-secondary">Раздел отключён</span>
+                <?php else: ?>
+                    <span class="badge bg-<?= $p['status'] === 'published' ? 'success' : 'secondary' ?>"><?= \RuEdu\Engine\Lang::publishStatus($p['status']) ?></span>
+                <?php endif; ?>
+            </td>
             <td><?= date('d.m.Y', strtotime($p['updated_at'])) ?></td>
             <td class="text-end">
+                <?php if ($isSection): ?>
+                    <a href="<?= url('admin/modules') ?>" class="btn btn-sm btn-outline-secondary" title="Управление разделами">
+                        <i class="bi bi-toggles"></i>
+                    </a>
+                <?php endif; ?>
                 <a href="<?= route('/page/' . $p['slug']) ?>" class="btn btn-sm btn-outline-secondary" target="_blank" title="Открыть на сайте">
                     <i class="bi bi-box-arrow-up-right"></i>
                 </a>

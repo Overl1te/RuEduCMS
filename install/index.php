@@ -11,7 +11,9 @@ use RuEdu\Engine\Router;
 use RuEdu\Engine\Migrate;
 use RuEdu\Engine\Version;
 use RuEdu\Engine\SiteStructure;
+use RuEdu\Engine\SiteSetup;
 use RuEdu\Model\User;
+use RuEdu\Model\Setting;
 
 if (Config::isInstalled()) {
     Router::redirect('');
@@ -115,6 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $config['seo_indexing'] = true;
                     $config['indexnow_key'] = bin2hex(random_bytes(16));
+                    $config['site_description'] = 'Сайт образовательного учреждения';
 
                     Config::save($config);
 
@@ -125,6 +128,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt = $pdo->prepare("INSERT INTO {$prefix}users (name, login, email, password, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, 'admin', 'active', ?, ?)");
                     $stmt->execute([$adminLogin, $adminLogin, $adminEmail, Auth::hashPassword($adminPass), $now, $now]);
 
+                    Setting::set('site_name', $siteName);
+                    Setting::set('site_url', $siteUrl);
+                    Setting::set('admin_email', $adminEmail);
+                    Setting::set('site_description', $config['site_description']);
+                    SiteSetup::markPending();
+
                     unset($_SESSION['install_db']);
 
                     register_shutdown_function(function (): void {
@@ -132,8 +141,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     });
 
                     Auth::attempt($adminLogin, $adminPass);
-                    \RuEdu\Engine\Session::flash('success', 'Установка завершена! Добро пожаловать в панель управления.');
-                    Router::redirect('admin/');
+                    \RuEdu\Engine\Session::flash('success', 'Установка завершена! Настройте сайт в несколько шагов.');
+                    Router::redirect('admin/setup');
                 } catch (Exception $e) {
                     $errors[] = 'Ошибка завершения установки: ' . $e->getMessage();
                 }

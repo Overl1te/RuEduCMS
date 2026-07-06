@@ -9,6 +9,7 @@ $assetBase = \RuEdu\Engine\Router::path('install/assets/');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Установка <?= htmlspecialchars(\RuEdu\Engine\Lang::APP_NAME) ?></title>
+    <link rel="icon" href="<?= htmlspecialchars(\RuEdu\Engine\SiteBranding::faviconUrl()) ?>" type="image/png">
     <link rel="stylesheet" href="<?= htmlspecialchars($assetBase) ?>install.css">
 </head>
 <body>

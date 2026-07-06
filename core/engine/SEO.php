@@ -46,7 +46,10 @@ class SEO
 
     public static function headLinks(): string
     {
+        $favicon = SiteBranding::faviconUrl();
         $links = [
+            '<link rel="icon" href="' . htmlspecialchars($favicon) . '" type="image/png">',
+            '<link rel="apple-touch-icon" href="' . htmlspecialchars($favicon) . '">',
             '<link rel="sitemap" type="application/xml" title="Sitemap" href="' . htmlspecialchars(Router::url('sitemap.xml')) . '">',
             '<link rel="alternate" type="application/rss+xml" title="RSS" href="' . htmlspecialchars(Router::url('news/rss')) . '">',
         ];
@@ -177,19 +180,19 @@ class SEO
         $sections = [
             [
                 'title' => 'Основные разделы',
-                'items' => [
-                    $makeItem('Главная', '/', '1.0'),
-                    $makeItem('Сведения об образовательной организации', '/sveden', '0.9'),
-                    $makeItem('Новости', '/news', '0.8'),
-                    $makeItem('Информация', '/page/informaciya', '0.7'),
-                    $makeItem('Проекты', '/page/proekty', '0.7'),
-                    $makeItem('Фотоальбомы', '/gallery', '0.7'),
-                    $makeItem('Контакты', '/contacts', '0.7'),
-                    $makeItem('Расписание', '/schedule', '0.7'),
-                    $makeItem('Документы', '/documents', '0.7'),
-                    $makeItem('Педагогический состав', '/staff', '0.7'),
+                'items' => array_values(array_filter([
+                    Modules::isUrlEnabled('/') ? $makeItem('Главная', '/', '1.0') : null,
+                    Modules::isUrlEnabled('/sveden') ? $makeItem('Сведения об образовательной организации', '/sveden', '0.9') : null,
+                    Modules::isUrlEnabled('/news') ? $makeItem('Новости', '/news', '0.8') : null,
+                    Modules::isUrlEnabled('/page/informaciya') ? $makeItem('Информация', '/page/informaciya', '0.7') : null,
+                    Modules::isUrlEnabled('/page/proekty') ? $makeItem('Проекты', '/page/proekty', '0.7') : null,
+                    Modules::isUrlEnabled('/gallery') ? $makeItem('Фотоальбомы', '/gallery', '0.7') : null,
+                    Modules::isUrlEnabled('/contacts') ? $makeItem('Контакты', '/contacts', '0.7') : null,
+                    Modules::isUrlEnabled('/schedule') ? $makeItem('Расписание', '/schedule', '0.7') : null,
+                    Modules::isUrlEnabled('/documents') ? $makeItem('Документы', '/documents', '0.7') : null,
+                    Modules::isUrlEnabled('/staff') ? $makeItem('Педагогический состав', '/staff', '0.7') : null,
                     $makeItem('Карта сайта', '/sitemap', '0.5'),
-                ],
+                ])),
             ],
         ];
 
@@ -199,6 +202,10 @@ class SEO
         if ($pages !== []) {
             $pageItems = [];
             foreach ($pages as $page) {
+                if (!Modules::isPageEnabled((string) $page['slug'])) {
+                    continue;
+                }
+
                 $pageItems[] = $makeItem(
                     (string) $page['title'],
                     '/page/' . $page['slug'],

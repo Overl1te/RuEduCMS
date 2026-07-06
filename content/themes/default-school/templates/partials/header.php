@@ -21,9 +21,7 @@
         <div class="container">
             <div class="header-main-inner">
                 <a href="<?= route('') ?>" class="logo">
-                    <span class="logo-mark" aria-hidden="true">
-                        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="10" fill="currentColor"/><path d="M18 8l8 5v10l-8 5-8-5V13l8-5z" fill="#fff" opacity=".9"/><path d="M18 14l4 2.5v5L18 24l-4-2.5v-5L18 14z" fill="currentColor"/></svg>
-                    </span>
+                    <img class="logo-mark" src="<?= htmlspecialchars(\RuEdu\Engine\SiteBranding::logoUrl()) ?>" width="40" height="40" alt="">
                     <span class="logo-text"><?= htmlspecialchars($site_name ?? \RuEdu\Engine\Config::get('site_name', \RuEdu\Engine\Lang::APP_NAME)) ?></span>
                 </a>
                 <button class="menu-toggle" id="menuToggle" aria-label="Меню" aria-expanded="false">

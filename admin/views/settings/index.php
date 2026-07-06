@@ -4,7 +4,7 @@ $title = 'Настройки';
 $s = $settings;
 ?>
 <h2 class="mb-4">Настройки сайта</h2>
-<form method="POST" action="<?= url('admin/settings/save') ?>">
+<form method="POST" action="<?= url('admin/settings/save') ?>" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf_token) ?>">
     <div class="row">
         <div class="col-md-6">
@@ -24,6 +24,23 @@ $s = $settings;
                 <div class="mb-3">
                     <label class="form-label">Email администратора</label>
                     <input type="email" name="admin_email" class="form-control" value="<?= htmlspecialchars($s['admin_email'] ?? Config::get('admin_email', '')) ?>">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Логотип и favicon</label>
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <img src="<?= htmlspecialchars(\RuEdu\Engine\SiteBranding::logoUrl()) ?>" alt="" width="48" height="48" class="border rounded" style="object-fit:contain">
+                        <div class="small text-muted">
+                            <?= \RuEdu\Engine\SiteBranding::isCustom() ? 'Загружен свой логотип' : 'Используется логотип ядра по умолчанию' ?>
+                        </div>
+                    </div>
+                    <input type="file" name="site_logo" class="form-control" accept="image/png,image/jpeg,image/gif,image/webp,image/x-icon,.ico">
+                    <div class="form-text">PNG, JPG, GIF, WebP или ICO. Отображается в шапке сайта и как favicon.</div>
+                    <?php if (\RuEdu\Engine\SiteBranding::isCustom()): ?>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" name="site_logo_reset" value="1" id="site_logo_reset">
+                            <label class="form-check-label" for="site_logo_reset">Вернуть логотип по умолчанию</label>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Тема оформления</label>

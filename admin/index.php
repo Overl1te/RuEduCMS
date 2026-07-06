@@ -17,6 +17,7 @@ use RuEdu\Engine\Migrate;
 use RuEdu\Engine\Version;
 use RuEdu\Engine\ThemeEditor;
 use RuEdu\Engine\SetupRecommendations;
+use RuEdu\Engine\SiteSetup;
 use RuEdu\Engine\SystemPages;
 use RuEdu\Engine\SearchIndexer;
 use RuEdu\Model\Page;
@@ -72,7 +73,7 @@ $router->post('/login', function () {
 
     if (Auth::attempt($login, $password)) {
         $db->delete('login_attempts', 'ip_address = ?', [$ip]);
-        Router::redirect('admin/');
+        Router::redirect(SiteSetup::isRequired() ? 'admin/setup' : 'admin/');
     }
 
     $db->insert('login_attempts', [
@@ -176,6 +177,53 @@ $router->post('/reset-password', function () {
 $router->get('/logout', function () {
     Auth::logout();
     Router::redirect('admin/login');
+});
+
+// Первоначальная настройка сайта
+$router->get('/setup', function () use ($admin) {
+    Auth::requireAdmin();
+    if (!SiteSetup::isRequired()) {
+        Router::redirect('admin/');
+    }
+
+    if (isset($_GET['back'])) {
+        SiteSetup::setCurrentStep(SiteSetup::prevStep(SiteSetup::getCurrentStep()));
+        Router::redirect('admin/setup');
+    }
+
+    $admin->render('setup/wizard', [
+        'currentStep' => SiteSetup::normalizeStep(SiteSetup::getCurrentStep()),
+    ]);
+});
+
+$router->post('/setup', function () use ($admin) {
+    Auth::requireAdmin();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Session::flash('error', 'Ошибка безопасности. Обновите страницу и попробуйте снова.');
+        Router::redirect('admin/setup');
+    }
+
+    if (!SiteSetup::isRequired()) {
+        Router::redirect('admin/');
+    }
+
+    $step = (int) ($_POST['step'] ?? 0);
+    $errors = SiteSetup::processStep($step, $_POST, $_FILES);
+
+    if ($errors !== []) {
+        $admin->render('setup/wizard', [
+            'currentStep' => SiteSetup::normalizeStep($step),
+            'errors' => $errors,
+        ]);
+        return;
+    }
+
+    if ($step === SiteSetup::STEP_FINISH) {
+        Session::flash('success', 'Настройка сайта завершена! Добро пожаловать в панель управления.');
+        Router::redirect('admin/');
+    }
+
+    Router::redirect('admin/setup');
 });
 
 // Dashboard
@@ -457,7 +505,16 @@ $router->get('/modules', function () use ($admin) {
     Auth::requireAdmin();
     $db = \RuEdu\Engine\Database::getInstance();
     $modules = $db->fetchAll("SELECT * FROM " . $db->table('modules') . " ORDER BY title");
-    $admin->render('modules/index', compact('modules'));
+    $codeModules = [];
+    $sectionModules = [];
+    foreach ($modules as $module) {
+        if (\RuEdu\Engine\Modules::isCodeModule((string) $module['name'])) {
+            $codeModules[] = $module;
+        } else {
+            $sectionModules[] = $module;
+        }
+    }
+    $admin->render('modules/index', compact('codeModules', 'sectionModules'));
 });
 
 $router->post('/modules/toggle/{id}', function (array $p) {
@@ -466,6 +523,7 @@ $router->post('/modules/toggle/{id}', function (array $p) {
     $mod = $db->fetch("SELECT * FROM " . $db->table('modules') . " WHERE id = ?", [(int) $p['id']]);
     if ($mod) {
         $db->update('modules', ['enabled' => $mod['enabled'] ? 0 : 1], 'id = ?', [(int) $p['id']]);
+        \RuEdu\Engine\Modules::resetCache();
         Cache::flush();
     }
     Router::redirect('admin/modules');
@@ -622,6 +680,15 @@ $router->post('/settings/save', function () {
     Auth::requireAdmin();
     if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) { Router::redirect('admin/settings'); }
 
+    if (!empty($_POST['site_logo_reset'])) {
+        \RuEdu\Engine\SiteBranding::resetLogo();
+    } elseif (!empty($_FILES['site_logo']['name'])) {
+        if (!\RuEdu\Engine\SiteBranding::uploadLogo($_FILES['site_logo'])) {
+            Session::flash('error', 'Не удалось загрузить логотип. Допустимы PNG, JPG, GIF, WebP и ICO.');
+            Router::redirect('admin/settings');
+        }
+    }
+
     $keys = ['site_name', 'site_description', 'site_url', 'admin_email', 'contact_phone',
              'contact_address', 'theme', 'cache_enabled', 'fz152_text', 'cookie_text', 'yandex_map'];
 
@@ -648,5 +715,9 @@ $router->post('/settings/save', function () {
 
 // Register module admin routes
 Hook::fire('register_admin_routes', $router);
+
+if (SiteSetup::isRequired() && Auth::check() && !SiteSetup::isExemptPath(Router::getUri())) {
+    Router::redirect('admin/setup');
+}
 
 $router->dispatch(Router::getMethod(), Router::getUri());

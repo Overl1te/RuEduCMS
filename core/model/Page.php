@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace RuEdu\Model;
 
 use RuEdu\Engine\Database;
+use RuEdu\Engine\Modules;
 use RuEdu\Engine\SEO;
 
 class Page
@@ -26,6 +27,10 @@ class Page
 
     public static function getBySlug(string $slug): ?array
     {
+        if (!Modules::isPageEnabled($slug)) {
+            return null;
+        }
+
         $db = Database::getInstance();
         return $db->fetch(
             "SELECT * FROM " . $db->table('pages') . " WHERE slug = ? AND status = 'published'",

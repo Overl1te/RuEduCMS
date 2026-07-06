@@ -10,6 +10,7 @@ class FrontController
     private const ALIASES = [
         'themes/' => 'content/themes/',
         'uploads/' => 'content/uploads/',
+        'core/assets/' => 'core/assets/',
     ];
 
     private const DENIED_PREFIXES = [
@@ -18,6 +19,8 @@ class FrontController
         'storage/',
         'content/modules/',
     ];
+
+    private const PUBLIC_CORE_PREFIX = 'core/assets/';
 
     /**
      * Обработка запроса для nginx (и любого сервера без mod_rewrite).
@@ -79,6 +82,10 @@ class FrontController
     {
         if ($relative === 'config.php') {
             return true;
+        }
+
+        if (str_starts_with($relative, self::PUBLIC_CORE_PREFIX)) {
+            return false;
         }
 
         foreach (self::DENIED_PREFIXES as $prefix) {

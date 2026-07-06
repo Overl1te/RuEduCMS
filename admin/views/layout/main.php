@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($title ?? 'Админка') ?> — <?= htmlspecialchars(\RuEdu\Engine\Lang::appName()) ?></title>
+    <link rel="icon" href="<?= htmlspecialchars(\RuEdu\Engine\SiteBranding::faviconUrl()) ?>" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="<?= url('admin/assets/css/admin.css') ?>" rel="stylesheet">
@@ -12,7 +13,10 @@
 <?php if (!isset($hideLayout)): ?>
 <div class="d-flex admin-layout">
     <nav class="sidebar bg-dark text-white p-3">
-        <h5 class="mb-4"><i class="bi bi-mortarboard"></i> <?= htmlspecialchars(\RuEdu\Engine\Lang::appName()) ?></h5>
+        <h5 class="mb-4 d-flex align-items-center gap-2">
+            <img src="<?= htmlspecialchars(\RuEdu\Engine\SiteBranding::logoUrl()) ?>" alt="" width="24" height="24" style="object-fit:contain">
+            <?= htmlspecialchars(\RuEdu\Engine\Lang::appName()) ?>
+        </h5>
         <ul class="nav flex-column">
             <?php foreach ($admin_menu ?? [] as $item): ?>
                 <li class="nav-item">

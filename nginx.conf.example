@@ -12,8 +12,13 @@ server {
         try_files $uri $uri/ /index.php?$is_args$args;
     }
 
+    # Публичные ресурсы ядра (логотип по умолчанию и т.п.)
+    location ^~ /core/assets/ {
+        try_files $uri =404;
+    }
+
     # Служебные папки — только через PHP include, не по HTTP
-    location ~ ^/(core|storage|config|content/modules)(/|$) {
+    location ~ ^/(core(?!/assets)|storage|config|content/modules)(/|$) {
         deny all;
         return 403;
     }

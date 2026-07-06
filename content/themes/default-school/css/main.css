@@ -125,9 +125,11 @@ a { color: var(--primary); }
 }
 
 .logo-mark {
-    color: var(--primary);
     flex-shrink: 0;
-    line-height: 0;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
 }
 
 .logo-text {

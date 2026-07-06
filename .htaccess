@@ -11,11 +11,12 @@ ErrorDocument 503 error.php
 # Алиасы для пользовательского контента (чистые URL без content/)
 RewriteRule ^themes/(.*)$ content/themes/$1 [L]
 RewriteRule ^uploads/(.*)$ content/uploads/$1 [L]
+RewriteRule ^core/assets/(.*)$ core/assets/$1 [L]
 RewriteRule ^admin/assets/(.*)$ admin/assets/$1 [L]
 
 # Защита ядра и служебных папок
 RewriteRule ^config(/.*)?$ error.php?code=403 [L,QSA]
-RewriteRule ^core(/.*)?$ error.php?code=403 [L,QSA]
+RewriteRule ^core/(?!assets/)(.*)$ error.php?code=403 [L,QSA]
 RewriteRule ^storage(/.*)?$ error.php?code=403 [L,QSA]
 RewriteRule ^content/modules(/.*)?$ error.php?code=403 [L,QSA]
 

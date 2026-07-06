@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/WebGuard.php';
 
 define('CORE_PATH', __DIR__);
+define('CORE_ASSETS_PATH', CORE_PATH . '/assets');
 define('ROOT_PATH', dirname(__DIR__));
 define('CONTENT_PATH', ROOT_PATH . '/content');
 define('THEMES_PATH', CONTENT_PATH . '/themes');
@@ -66,7 +67,7 @@ function route(string $path = ''): string
 }
 
 /**
- * Статический ресурс (uploads, themes, admin/assets).
+ * Статический ресурс (uploads, themes, core/assets, admin/assets).
  */
 function asset(string $path = ''): string
 {

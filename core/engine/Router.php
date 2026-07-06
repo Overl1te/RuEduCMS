@@ -132,7 +132,7 @@ class Router
     }
 
     /**
-     * Статический ресурс: uploads, themes, admin/assets.
+     * Статический ресурс: uploads, themes, core/assets, admin/assets.
      */
     public static function asset(string $path = ''): string
     {

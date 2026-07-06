@@ -21,7 +21,21 @@ class SiteStructure
             '<p>Раздел «' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '». '
             . 'Заполните содержимое в панели администратора: <strong>Страницы</strong>.</p>';
 
-        $pages = [
+        $pages = self::pageDefinitions();
+
+        return array_map(static function (array $page) use ($placeholder): array {
+            $page['content'] = $placeholder($page['title']);
+
+            return $page;
+        }, $pages);
+    }
+
+    /**
+     * @return list<array{title: string, slug: string, sort_order: int}>
+     */
+    public static function pageDefinitions(): array
+    {
+        return [
             ['title' => 'Информация', 'slug' => 'informaciya', 'sort_order' => 10],
             ['title' => 'Проекты', 'slug' => 'proekty', 'sort_order' => 11],
             ['title' => 'Обращения граждан', 'slug' => 'obrashcheniya-grazhdan', 'sort_order' => 20],
@@ -59,12 +73,23 @@ class SiteStructure
             ['title' => 'Охрана труда', 'slug' => 'ohrana-truda', 'sort_order' => 92],
             ['title' => 'Навигаторы детства', 'slug' => 'navigatory-detstva', 'sort_order' => 93],
         ];
+    }
 
-        return array_map(static function (array $page) use ($placeholder): array {
-            $page['content'] = $placeholder($page['title']);
+    /**
+     * @return list<array{name: string, title: string, description: string}>
+     */
+    public static function sectionModules(): array
+    {
+        $modules = [];
+        foreach (self::pageDefinitions() as $page) {
+            $modules[] = [
+                'name' => Modules::sectionName($page['slug']),
+                'title' => $page['title'],
+                'description' => 'Типовой раздел сайта. Отключение скрывает страницу и пункты меню.',
+            ];
+        }
 
-            return $page;
-        }, $pages);
+        return $modules;
     }
 
     /**
@@ -173,27 +198,33 @@ class SiteStructure
             ['title' => 'Главная', 'url' => '/', 'children' => []],
         ];
 
-        foreach (self::mainMenu() as $item) {
+        foreach (Modules::filterMenuItems(self::mainMenu()) as $item) {
             $tree[] = self::normalizeTreeItem($item);
         }
 
-        $sideRoot = [
-            'title' => 'Разделы сайта',
-            'url' => '#',
-            'children' => [],
-        ];
-        foreach (self::sideMenu() as $item) {
-            $sideRoot['children'][] = self::normalizeTreeItem($item);
+        $sideItems = Modules::filterMenuItems(self::sideMenu());
+        if ($sideItems !== []) {
+            $sideRoot = [
+                'title' => 'Разделы сайта',
+                'url' => '#',
+                'children' => [],
+            ];
+            foreach ($sideItems as $item) {
+                $sideRoot['children'][] = self::normalizeTreeItem($item);
+            }
+            $tree[] = $sideRoot;
         }
-        $tree[] = $sideRoot;
+
+        $serviceChildren = [];
+        if (Modules::isEnabled('staff')) {
+            $serviceChildren[] = ['title' => 'Педагогический состав', 'url' => '/staff', 'children' => []];
+        }
+        $serviceChildren[] = ['title' => 'Карта сайта', 'url' => '/sitemap', 'children' => []];
 
         $tree[] = [
             'title' => 'Служебные страницы',
             'url' => '#',
-            'children' => [
-                ['title' => 'Карта сайта', 'url' => '/sitemap', 'children' => []],
-                ['title' => 'Педагогический состав', 'url' => '/staff', 'children' => []],
-            ],
+            'children' => $serviceChildren,
         ];
 
         return $tree;
@@ -201,6 +232,8 @@ class SiteStructure
 
     public static function seed(\PDO $pdo, string $prefix, bool $replaceMenus = false): void
     {
+        self::seedSectionModules($pdo, $prefix);
+
         if (!self::isSeeded($pdo, $prefix) || $replaceMenus) {
             self::seedPages($pdo, $prefix);
             self::seedMenus($pdo, $prefix, $replaceMenus);
@@ -210,6 +243,8 @@ class SiteStructure
 
     public static function seedForMigration(\PDO $pdo, string $prefix): void
     {
+        self::seedSectionModules($pdo, $prefix);
+
         if (self::isSeeded($pdo, $prefix)) {
             return;
         }
@@ -218,6 +253,29 @@ class SiteStructure
         self::seedPages($pdo, $prefix);
         self::seedMenus($pdo, $prefix, $shouldReplaceMenus);
         self::markSeeded($pdo, $prefix);
+    }
+
+    private static function seedSectionModules(\PDO $pdo, string $prefix): void
+    {
+        $table = $prefix . 'modules';
+        if (!Migrate::tableExists($pdo, $table)) {
+            return;
+        }
+
+        $check = $pdo->prepare("SELECT id FROM `{$table}` WHERE name = ? LIMIT 1");
+        $insert = $pdo->prepare(
+            "INSERT INTO `{$table}` (name, title, description, enabled, created_at) VALUES (?, ?, ?, 1, ?)"
+        );
+        $now = date('Y-m-d H:i:s');
+
+        foreach (self::sectionModules() as $module) {
+            $check->execute([$module['name']]);
+            if ($check->fetchColumn()) {
+                continue;
+            }
+
+            $insert->execute([$module['name'], $module['title'], $module['description'], $now]);
+        }
     }
 
     private static function seedPages(\PDO $pdo, string $prefix): void
