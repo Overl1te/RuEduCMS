@@ -1,14 +1,25 @@
 RewriteEngine On
 
+# Кастомные страницы ошибок (вместо стандартных Apache)
+ErrorDocument 400 core/handler.php
+ErrorDocument 401 core/handler.php
+ErrorDocument 403 core/handler.php
+ErrorDocument 404 core/handler.php
+ErrorDocument 500 core/handler.php
+ErrorDocument 503 core/handler.php
+
 # Алиасы для пользовательского контента (чистые URL без content/)
 RewriteRule ^themes/(.*)$ content/themes/$1 [L]
 RewriteRule ^uploads/(.*)$ content/uploads/$1 [L]
 RewriteRule ^admin/assets/(.*)$ admin/assets/$1 [L]
 
+# Обработчик ошибок — единственный публичный файл в core/
+RewriteRule ^core/handler\.php$ - [L]
+
 # Защита ядра и служебных папок
-RewriteRule ^core/ - [F,L]
-RewriteRule ^storage/ - [F,L]
-RewriteRule ^content/modules/ - [F,L]
+RewriteRule ^core(/.*)?$ - [F,L]
+RewriteRule ^storage(/.*)?$ - [F,L]
+RewriteRule ^content/modules(/.*)?$ - [F,L]
 
 # Запрет прямого доступа к config.php
 RewriteRule ^config\.php$ - [F,L]

@@ -6,6 +6,7 @@ require_once __DIR__ . '/core/bootstrap.php';
 
 use RuEdu\Engine\Auth;
 use RuEdu\Engine\Config;
+use RuEdu\Engine\ErrorPage;
 use RuEdu\Engine\Router;
 use RuEdu\Engine\Template;
 use RuEdu\Engine\Hook;
@@ -20,9 +21,7 @@ if (!Config::isInstalled()) {
     if (is_dir(ROOT_PATH . '/install')) {
         Router::redirect('install/');
     }
-    http_response_code(503);
-    echo 'CMS не установлена. Папка install/ отсутствует.';
-    exit;
+    ErrorPage::send(503, 'CMS не установлена. Папка install/ отсутствует.');
 }
 
 Config::load();
@@ -34,15 +33,8 @@ Hook::loadModules();
 $router = new Router(Router::basePath());
 $template = new Template();
 
-$render404 = function () use ($template): void {
-    http_response_code(404);
-    echo $template->setData([
-        'menu' => Menu::getByLocation('main'),
-        'site_name' => Config::get('site_name'),
-        'meta' => SEO::metaTags([
-            'title' => 'Страница не найдена — ' . Config::get('site_name'),
-        ]),
-    ])->render('404');
+$render404 = function (): void {
+    ErrorPage::send(404);
 };
 
 $router->setNotFoundHandler($render404);

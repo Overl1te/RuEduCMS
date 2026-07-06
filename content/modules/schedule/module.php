@@ -74,6 +74,28 @@ function scheduleBuildGrid(array $rows): array
     return $schedule;
 }
 
+function scheduleFetchTeachers(Database $db): array
+{
+    $rows = $db->fetchAll(
+        "SELECT name FROM " . $db->table('staff') . " WHERE name != '' AND status = 'active' ORDER BY sort_order, name"
+    );
+
+    return array_values(array_unique(array_column($rows, 'name')));
+}
+
+function scheduleFetchSubjects(Database $db): array
+{
+    $rows = $db->fetchAll(
+        "SELECT DISTINCT subject FROM (
+            SELECT subject FROM " . $db->table('staff') . " WHERE subject != ''
+            UNION
+            SELECT DISTINCT subject FROM " . $db->table('schedule') . " WHERE subject != ''
+        ) AS t ORDER BY subject"
+    );
+
+    return array_column($rows, 'subject');
+}
+
 Hook::on('register_routes', function ($router) use ($days) {
     $router->get('/schedule', function () use ($days) {
         $db = Database::getInstance();
@@ -122,7 +144,9 @@ Hook::on('register_admin_routes', function ($router) use ($days) {
             $schedule = scheduleBuildGrid($rows);
         }
 
-        modRender('index', compact('classes', 'class', 'days', 'schedule'));
+        $teachers = scheduleFetchTeachers($db);
+        $subjects = scheduleFetchSubjects($db);
+        modRender('index', compact('classes', 'class', 'days', 'schedule', 'teachers', 'subjects'));
     });
 
     $router->post('/schedule/class/save', function () {

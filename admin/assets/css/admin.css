@@ -20,8 +20,7 @@
     left: 0;
     z-index: 1000;
     width: 250px;
-    height: auto;
-    max-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -54,16 +53,16 @@ table td { vertical-align: middle; }
     gap: 8px;
 }
 .schedule-class-cell {
-    width: 56px;
-    height: 56px;
-    display: flex;
+    padding: 4px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     border: 1px solid #ced4da;
-    border-radius: 6px;
+    border-radius: 4px;
     text-decoration: none;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
+    line-height: 1.2;
     color: var(--bs-body-color);
     background: #f0f2f5;
     transition: background .15s, border-color .15s, color .15s;
@@ -87,6 +86,9 @@ table td { vertical-align: middle; }
     color: var(--bs-secondary);
     background: #f8f9fa;
 }
+.schedule-class-cell--add .bi {
+    font-size: 12px;
+}
 .schedule-class-cell--add:hover {
     border-color: var(--bs-primary);
     color: var(--bs-primary);
@@ -94,16 +96,16 @@ table td { vertical-align: middle; }
 }
 .schedule-days-grid {
     display: grid;
-    grid-template-columns: repeat(3, 360px);
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    justify-content: center;
+    width: 100%;
 }
 .schedule-day-block {
     min-width: 0;
 }
 .schedule-day-title {
     margin: 0 0 .5rem;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
 }
 .schedule-add-row td {
@@ -112,9 +114,40 @@ table td { vertical-align: middle; }
 }
 .schedule-day-table {
     margin-bottom: 0;
-    font-size: 0.8125rem;
+    width: 100%;
 }
 .schedule-day-table th,
 .schedule-day-table td {
-    padding: .35rem .4rem;
+    padding: .5rem .6rem;
+}
+
+.autocomplete-wrap {
+    position: relative;
+}
+.autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1060;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 2px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    background: #fff;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+.autocomplete-item {
+    display: block;
+    width: 100%;
+    padding: 0.45rem 0.75rem;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    color: inherit;
+}
+.autocomplete-item:hover,
+.autocomplete-item.active {
+    background: var(--bs-primary-bg-subtle, #e7f1ff);
 }

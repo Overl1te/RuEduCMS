@@ -187,9 +187,7 @@ class Auth
     {
         self::requireAuth();
         if (!self::isEditor()) {
-            http_response_code(403);
-            echo 'Доступ запрещён';
-            exit;
+            ErrorPage::send(403);
         }
     }
 
@@ -197,9 +195,7 @@ class Auth
     {
         self::requireAuth();
         if (!self::isAdmin()) {
-            http_response_code(403);
-            echo 'Доступ запрещён';
-            exit;
+            ErrorPage::send(403);
         }
     }
 }

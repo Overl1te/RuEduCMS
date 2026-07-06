@@ -120,11 +120,20 @@
                 </div>
                 <div class="mb-2">
                     <label class="form-label">Предмет</label>
-                    <input type="text" name="subject" class="form-control" required>
+                    <input type="text"
+                           name="subject"
+                           class="form-control"
+                           required
+                           autocomplete="off"
+                           data-autocomplete="<?= htmlspecialchars(json_encode($subjects ?? [], JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class="mb-2">
                     <label class="form-label">Учитель</label>
-                    <input type="text" name="teacher" class="form-control">
+                    <input type="text"
+                           name="teacher"
+                           class="form-control"
+                           autocomplete="off"
+                           data-autocomplete="<?= htmlspecialchars(json_encode($teachers ?? [], JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class="mb-2">
                     <label class="form-label">Кабинет</label>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/core/bootstrap.php';
 
 use RuEdu\Engine\Config;
+use RuEdu\Engine\ErrorPage;
 use RuEdu\Engine\Router;
 use RuEdu\Engine\Auth;
 use RuEdu\Engine\Session;
@@ -28,9 +29,7 @@ if (!Config::isInstalled()) {
     if (is_dir(ROOT_PATH . '/install')) {
         Router::redirect('install/');
     }
-    http_response_code(503);
-    echo 'CMS не установлена.';
-    exit;
+    ErrorPage::send(503, 'CMS не установлена.');
 }
 
 Config::load();

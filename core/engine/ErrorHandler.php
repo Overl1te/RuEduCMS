@@ -126,6 +126,10 @@ class ErrorHandler
             ob_end_clean();
         }
 
+        if (!$showDetails && !$isAdminRequest) {
+            ErrorPage::send(500);
+        }
+
         include CORE_PATH . '/views/critical-error.php';
         exit;
     }

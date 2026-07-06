@@ -3,6 +3,7 @@
 use RuEdu\Engine\Hook;
 use RuEdu\Engine\Database;
 use RuEdu\Engine\Auth;
+use RuEdu\Engine\ErrorPage;
 use RuEdu\Engine\Session;
 use RuEdu\Engine\Router;
 use RuEdu\Engine\Config;
@@ -14,8 +15,7 @@ Hook::on('register_routes', function ($router) {
         $form = $db->fetch("SELECT * FROM " . $db->table('forms') . " WHERE slug = ? AND status = 'active'", [$params['slug']]);
 
         if (!$form) {
-            http_response_code(404);
-            return;
+            ErrorPage::send(404);
         }
 
         $submissionData = [];

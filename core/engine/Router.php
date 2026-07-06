@@ -69,14 +69,12 @@ class Router
             }
         }
 
-        http_response_code(404);
-
         if ($this->notFoundHandler !== null) {
             call_user_func($this->notFoundHandler);
             return;
         }
 
-        echo 'Страница не найдена';
+        ErrorPage::send(404);
     }
 
     public static function getUri(): string

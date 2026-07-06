@@ -2,6 +2,7 @@
 
 use RuEdu\Engine\Hook;
 use RuEdu\Engine\Database;
+use RuEdu\Engine\ErrorPage;
 use RuEdu\Engine\Template;
 use RuEdu\Engine\SEO;
 use RuEdu\Engine\Config;
@@ -26,7 +27,7 @@ Hook::on('register_routes', function ($router) {
     $router->get('/gallery/{slug}', function ($params) {
         $db = Database::getInstance();
         $album = $db->fetch("SELECT * FROM " . $db->table('gallery_albums') . " WHERE slug = ?", [$params['slug']]);
-        if (!$album) { http_response_code(404); return; }
+        if (!$album) { ErrorPage::send(404); }
         $images = $db->fetchAll("SELECT * FROM " . $db->table('gallery_images') . " WHERE album_id = ? ORDER BY sort_order", [$album['id']]);
         $template = new Template();
         echo $template->setData([
