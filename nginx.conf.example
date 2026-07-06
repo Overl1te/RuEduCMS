@@ -17,15 +17,10 @@ server {
         try_files $uri =404;
     }
 
-    # Компиляция SCSS тем
-    location = /core/scss.php {
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/core/scss.php;
-        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
-    }
+    # SCSS тем: themes/{slug}/style.css — виртуальный URL, обрабатывается index.php
 
     # Служебные папки — только через PHP include, не по HTTP
-    location ~ ^/(core(?!/(assets|scss\.php))|storage|config|content/modules)(/|$) {
+    location ~ ^/(core(?!/assets)|storage|config|content/modules)(/|$) {
         deny all;
         return 403;
     }

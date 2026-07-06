@@ -20,6 +20,11 @@ class Scss
         return is_file(self::mainScssPath($slug));
     }
 
+    public static function publicStyleUrl(string $slug): string
+    {
+        return Router::asset('themes/' . $slug . '/style.css');
+    }
+
     public static function mainScssPath(string $slug): string
     {
         return THEMES_PATH . '/' . $slug . '/scss/main.scss';

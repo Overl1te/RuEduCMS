@@ -65,7 +65,7 @@ class Template
     {
         $theme = basename($this->themePath);
         if (Scss::themeUsesScss($theme)) {
-            return Router::asset('core/scss.php?theme=' . rawurlencode($theme));
+            return Scss::publicStyleUrl($theme);
         }
 
         return $this->asset('css/main.css');

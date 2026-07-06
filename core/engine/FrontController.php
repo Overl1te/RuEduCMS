@@ -31,8 +31,18 @@ class FrontController
     {
         $relative = self::relativePath();
 
-        if ($relative === 'core/scss.php') {
-            require CORE_PATH . '/scss.php';
+        if (preg_match('#^themes/([a-z0-9][a-z0-9\-]*)/style\.css$#', $relative, $matches)) {
+            $slug = $matches[1];
+            if (!ThemeEditor::isValidSlug($slug) || !Scss::themeUsesScss($slug)) {
+                ErrorPage::send(404);
+                return true;
+            }
+
+            if (Config::isInstalled()) {
+                Config::load();
+            }
+
+            Scss::serve($slug);
             return true;
         }
 
