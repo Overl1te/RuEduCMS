@@ -157,6 +157,8 @@ class Updater
             return null;
         }
 
+        $applied = false;
+
         try {
             if (!is_file($manifestFile)) {
                 return null;
@@ -183,7 +185,7 @@ class Updater
 
             Migrate::run();
             Cache::flush();
-            self::clearPending($pendingDir);
+            $applied = true;
 
             return [
                 'ok' => true,
@@ -199,6 +201,10 @@ class Updater
         } finally {
             flock($lock, LOCK_UN);
             fclose($lock);
+
+            if ($applied) {
+                self::clearPending($pendingDir);
+            }
         }
     }
 
@@ -227,8 +233,12 @@ class Updater
 
     private static function clearPending(string $pendingDir): void
     {
-        if (is_dir($pendingDir)) {
-            ruedu_delete_directory($pendingDir);
+        if (!is_dir($pendingDir)) {
+            return;
+        }
+
+        if (!ruedu_delete_directory($pendingDir) && is_dir($pendingDir)) {
+            error_log('RuEduCMS update cleanup failed: could not remove ' . $pendingDir);
         }
     }
 

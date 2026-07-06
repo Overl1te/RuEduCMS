@@ -116,11 +116,19 @@ function ruedu_delete_directory(string $dir): bool
         }
         $path = $dir . DIRECTORY_SEPARATOR . $item;
         if (is_dir($path)) {
-            ruedu_delete_directory($path);
-        } else {
-            unlink($path);
+            if (!ruedu_delete_directory($path)) {
+                return false;
+            }
+            continue;
+        }
+
+        if (!is_writable($path)) {
+            @chmod($path, 0666);
+        }
+        if (!@unlink($path) && is_file($path)) {
+            return false;
         }
     }
 
-    return rmdir($dir);
+    return @rmdir($dir) || !is_dir($dir);
 }

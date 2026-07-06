@@ -68,65 +68,35 @@
     display: inline;
 }
 
-// Панель: версия для слабовидящих + быстрые ссылки
-.header-toolbar {
-    background: linear-gradient(90deg, var(--primary-dark) 0%, #1e293b 100%);
-    border-bottom: 1px solid rgba(255, 255, 255, .06);
-    padding: 10px 0;
-}
-
-.header-toolbar-inner {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.header-quick-links {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    flex: 1;
-    min-width: 0;
-}
-
-.toolbar-btn {
+.a11y-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 7px 14px;
+    gap: 8px;
+    padding: 9px 16px;
     border-radius: 100px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    letter-spacing: .02em;
+    color: var(--primary);
     text-decoration: none;
-    color: rgba(255, 255, 255, .82);
-    background: rgba(255, 255, 255, .06);
-    border: 1px solid rgba(255, 255, 255, .1);
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
     transition: all var(--transition);
-    white-space: nowrap;
     cursor: pointer;
-    font-family: inherit;
+    white-space: nowrap;
 }
 
-.toolbar-btn:hover {
+.a11y-toggle:hover {
     color: #fff;
-    background: rgba(255, 255, 255, .14);
-    border-color: rgba(255, 255, 255, .22);
-    transform: translateY(-1px);
+    background: var(--primary);
+    border-color: var(--primary);
 }
 
-.toolbar-btn--a11y {
-    flex-shrink: 0;
-    background: rgba(245, 158, 11, .15);
-    border-color: rgba(245, 158, 11, .35);
-    color: var(--accent-light);
+.a11y-toggle .icon {
+    color: var(--accent-coral);
+    transition: color var(--transition);
 }
 
-.toolbar-btn--a11y:hover {
-    background: rgba(245, 158, 11, .28);
-    border-color: var(--accent-light);
+.a11y-toggle:hover .icon {
     color: #fff;
 }
 
@@ -286,9 +256,9 @@
     z-index: 1;
     background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
     color: rgba(255, 255, 255, .7);
-    padding: 0 0 28px;
+    padding: 0 0 32px;
     overflow: hidden;
-    min-height: 360px;
+    min-height: 420px;
 }
 
 .footer-noise {
@@ -333,9 +303,9 @@
 
 .footer-grid {
     display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 40px;
-    margin-bottom: 40px;
+    grid-template-columns: 1.4fr repeat(2, minmax(160px, 1fr));
+    gap: 48px;
+    margin-bottom: 48px;
 }
 
 .footer-col--brand {
@@ -385,6 +355,37 @@
 }
 
 .footer-col ul { list-style: none; }
+
+.footer-links li,
+.footer-contacts li {
+    margin-bottom: 4px;
+}
+
+.footer-contact-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .35);
+    margin-bottom: 4px;
+}
+
+.footer-contacts span,
+.footer-contacts a {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .8);
+}
+
+.footer-contacts a {
+    text-decoration: none;
+    transition: color var(--transition);
+}
+
+.footer-contacts a:hover {
+    color: var(--accent-light);
+}
 
 .footer-col a {
     color: rgba(255, 255, 255, .75);
@@ -618,23 +619,14 @@ body.a11y-dark .site-canvas {
         padding: 10px;
     }
 
-    .header-toolbar-inner {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
+    .a11y-toggle__text { display: none; }
 
-    .header-quick-links {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding-bottom: 4px;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
+    .a11y-toggle {
+        padding: 10px;
     }
-
-    .header-quick-links::-webkit-scrollbar { display: none; }
 
     .footer-grid {
         grid-template-columns: 1fr;
+        gap: 32px;
     }
 }

@@ -13,34 +13,16 @@
                             <span class="header-phone__text"><?= htmlspecialchars($phone) ?></span>
                         </a>
                     <?php endif; ?>
+                    <a href="#" class="a11y-toggle" id="a11yToggle" title="Версия для слабовидящих">
+                        <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span class="a11y-toggle__text">Версия для слабовидящих</span>
+                    </a>
                     <button class="menu-toggle" id="menuToggle" aria-label="Меню" aria-expanded="false">
                         <span class="menu-toggle-bar"></span>
                         <span class="menu-toggle-bar"></span>
                         <span class="menu-toggle-bar"></span>
                     </button>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="header-toolbar">
-        <div class="container">
-            <div class="header-toolbar-inner">
-                <a href="#" class="toolbar-btn toolbar-btn--a11y" id="a11yToggle" title="Версия для слабовидящих">
-                    <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <span>Версия для слабовидящих</span>
-                </a>
-                <nav class="header-quick-links" aria-label="Быстрые разделы">
-                    <a href="<?= route('sveden') ?>" class="toolbar-btn">Сведения об ОО</a>
-                    <a href="<?= route('news') ?>" class="toolbar-btn">Новости</a>
-                    <?php if (\RuEdu\Engine\Modules::isUrlEnabled('/schedule')): ?>
-                    <a href="<?= route('schedule') ?>" class="toolbar-btn">Расписание</a>
-                    <?php endif; ?>
-                    <?php if (\RuEdu\Engine\Modules::isUrlEnabled('/gallery')): ?>
-                    <a href="<?= route('gallery') ?>" class="toolbar-btn">Галерея</a>
-                    <?php endif; ?>
-                    <a href="<?= route('contacts') ?>" class="toolbar-btn">Контакты</a>
-                    <a href="<?= route('sitemap') ?>" class="toolbar-btn">Карта сайта</a>
-                </nav>
             </div>
         </div>
     </div>
