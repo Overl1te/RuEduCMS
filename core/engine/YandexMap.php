@@ -154,10 +154,8 @@ class YandexMap
         $src = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
         $height = self::HEIGHT;
 
-        return '<iframe src="' . $src . '" width="100%" height="' . $height . '"'
-            . ' frameborder="0" allowfullscreen="true"'
-            . ' style="display:block;width:100%;height:' . $height . 'px;border:0;"'
-            . ' title="Карта"></iframe>';
+        return '<iframe class="yandex-map-frame" src="' . $src . '" width="100%" height="' . $height . '"'
+            . ' frameborder="0" allowfullscreen="true" loading="lazy" title="Карта"></iframe>';
     }
 
     private static function buildScript(string $src): string

@@ -31,6 +31,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fontSize) setFontSize(fontSize);
     if (colorScheme) setColorScheme(colorScheme);
 
+    document.querySelectorAll('.map-container__embed iframe').forEach(function(frame) {
+        frame.style.removeProperty('display');
+        frame.style.removeProperty('visibility');
+        if (window.getComputedStyle(frame).display === 'none') {
+            frame.style.setProperty('display', 'block', 'important');
+        }
+    });
+
     document.querySelectorAll('[data-ajax-form]').forEach(function(form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
