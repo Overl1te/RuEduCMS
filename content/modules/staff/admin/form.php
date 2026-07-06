@@ -12,7 +12,7 @@
             <div class="mb-3"><label class="form-label">Квалификация</label><input type="text" name="qualification" class="form-control" value="<?= htmlspecialchars($member['qualification'] ?? '') ?>"></div>
             <div class="mb-3"><label class="form-label">Стаж</label><input type="text" name="experience" class="form-control" value="<?= htmlspecialchars($member['experience'] ?? '') ?>"></div>
             <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" value="<?= htmlspecialchars($member['email'] ?? '') ?>"></div>
-            <div class="mb-3"><label class="form-label">Телефон</label><input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($member['phone'] ?? '') ?>"></div>
+            <div class="mb-3"><label class="form-label">Телефон</label><input type="tel" name="phone" class="form-control" value="<?= htmlspecialchars($member['phone'] ?? '') ?>" placeholder="+7 (___) ___-__-__"></div>
             <div class="mb-3"><label class="form-label">Порядок</label><input type="number" name="sort_order" class="form-control" value="<?= $member['sort_order'] ?? 0 ?>"></div>
             <button type="submit" class="btn btn-primary">Сохранить</button>
         </div>

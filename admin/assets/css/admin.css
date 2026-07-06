@@ -53,7 +53,10 @@ table td { vertical-align: middle; }
     gap: 8px;
 }
 .schedule-class-cell {
-    padding: 4px;
+    box-sizing: border-box;
+    width: 32px;
+    height: 32px;
+    padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -61,11 +64,16 @@ table td { vertical-align: middle; }
     border-radius: 4px;
     text-decoration: none;
     font-weight: 600;
-    font-size: 12px;
-    line-height: 1.2;
+    font-size: 14px;
+    line-height: 1;
     color: var(--bs-body-color);
     background: #f0f2f5;
     transition: background .15s, border-color .15s, color .15s;
+}
+.schedule-class-cell--wide {
+    width: auto;
+    min-width: 32px;
+    padding: 0 8px;
 }
 .schedule-class-cell:hover {
     border-color: var(--bs-primary);
@@ -85,9 +93,13 @@ table td { vertical-align: middle; }
     cursor: pointer;
     color: var(--bs-secondary);
     background: #f8f9fa;
+    width: 32px;
+    height: 32px;
+    padding: 0;
 }
 .schedule-class-cell--add .bi {
-    font-size: 12px;
+    font-size: 14px;
+    line-height: 1;
 }
 .schedule-class-cell--add:hover {
     border-color: var(--bs-primary);
@@ -97,7 +109,7 @@ table td { vertical-align: middle; }
 .schedule-days-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 24px;
     width: 100%;
 }
 .schedule-day-block {
@@ -115,10 +127,25 @@ table td { vertical-align: middle; }
 .schedule-day-table {
     margin-bottom: 0;
     width: 100%;
+    overflow: visible;
 }
 .schedule-day-table th,
 .schedule-day-table td {
-    padding: .5rem .6rem;
+    padding: .35rem .45rem;
+    vertical-align: middle;
+}
+.schedule-day-table .form-control-sm {
+    font-size: 0.8125rem;
+    padding: 0.2rem 0.4rem;
+    min-width: 0;
+}
+.schedule-day-table input[data-time-mask] {
+    min-width: 7.5rem;
+}
+.schedule-lesson-num {
+    text-align: center;
+    font-weight: 600;
+    width: 2.5rem;
 }
 
 .autocomplete-wrap {

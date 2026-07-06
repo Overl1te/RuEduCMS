@@ -55,7 +55,7 @@ $s = $settings;
             <div class="card mb-3"><div class="card-header">Контакты</div><div class="card-body">
                 <div class="mb-3">
                     <label class="form-label">Телефон</label>
-                    <input type="text" name="contact_phone" class="form-control" value="<?= htmlspecialchars($s['contact_phone'] ?? '') ?>">
+                    <input type="tel" name="contact_phone" class="form-control" value="<?= htmlspecialchars($s['contact_phone'] ?? '') ?>" placeholder="+7 (___) ___-__-__">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Адрес</label>

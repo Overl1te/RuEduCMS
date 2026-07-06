@@ -8,6 +8,8 @@
             <label class="form-label"><?= htmlspecialchars($label) ?></label>
             <?php if (strlen($label) > 50 || in_array($key, ['programs', 'info', 'content', 'local_acts'])): ?>
                 <textarea name="<?= $key ?>" class="form-control" rows="4"><?= htmlspecialchars($data[$key] ?? '') ?></textarea>
+            <?php elseif ($key === 'phone'): ?>
+                <input type="tel" name="<?= $key ?>" class="form-control" value="<?= htmlspecialchars($data[$key] ?? '') ?>" placeholder="+7 (___) ___-__-__">
             <?php else: ?>
                 <input type="text" name="<?= $key ?>" class="form-control" value="<?= htmlspecialchars($data[$key] ?? '') ?>">
             <?php endif; ?>

@@ -81,7 +81,7 @@ $router->get('/', function () use ($template) {
     $html = Auth::check() ? null : Cache::get($cacheKey);
 
     if ($html === null) {
-        $articles = Article::getAll('published', 5);
+        $articles = Article::getAll('published', 3);
         $menu = Menu::getByLocation('main');
 
         $html = $template->setData([

@@ -78,7 +78,7 @@ $codeModules = SiteSetup::getCodeModules();
                         <div class="col-md-6">
                             <div class="setup-form-group mb-0">
                                 <label for="contact_phone">Телефон</label>
-                                <input type="text" id="contact_phone" name="contact_phone"
+                                <input type="tel" id="contact_phone" name="contact_phone"
                                        value="<?= htmlspecialchars($info['contact_phone']) ?>"
                                        placeholder="+7 (___) ___-__-__">
                             </div>
@@ -171,8 +171,9 @@ $codeModules = SiteSetup::getCodeModules();
                         <div class="col-md-6">
                             <div class="setup-form-group mb-0">
                                 <label for="phone">Телефон</label>
-                                <input type="text" id="phone" name="phone" required
-                                       value="<?= htmlspecialchars($organization['phone']) ?>">
+                                <input type="tel" id="phone" name="phone" required
+                                       value="<?= htmlspecialchars($organization['phone']) ?>"
+                                       placeholder="+7 (___) ___-__-__">
                             </div>
                         </div>
                         <div class="col-md-6">

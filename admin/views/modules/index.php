@@ -1,7 +1,7 @@
 <?php $title = 'Модули'; ?>
 
 <?php
-$renderModuleCard = static function (array $m): void {
+$renderModuleCard = static function (array $m) use ($csrf_token): void {
     ?>
     <div class="col-md-4">
         <div class="card h-100">

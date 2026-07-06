@@ -13,29 +13,6 @@
     </div>
 </section>
 
-<?php if (!empty($articles)): ?>
-<section class="section news-section">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">Последние новости</h2>
-            <p class="section-subtitle">Актуальные события и объявления</p>
-        </div>
-        <div class="news-grid">
-            <?php foreach ($articles as $article): ?>
-                <article class="news-card">
-                    <h3><a href="<?= route('news/' . $article['slug']) ?>"><?= htmlspecialchars($article['title']) ?></a></h3>
-                    <time><?= $article['published_at'] ? date('d.m.Y', strtotime($article['published_at'])) : '' ?></time>
-                    <p><?= htmlspecialchars(mb_substr($article['excerpt'] ?? strip_tags($article['content'] ?? ''), 0, 150)) ?>...</p>
-                </article>
-            <?php endforeach; ?>
-        </div>
-        <div class="text-center mt-4">
-            <a href="<?= route('news') ?>" class="btn btn-outline">Все новости →</a>
-        </div>
-    </div>
-</section>
-<?php endif; ?>
-
 <section class="section quick-links section-alt">
     <div class="container">
         <div class="section-header">
@@ -67,6 +44,37 @@
                 <span class="link-label">Фотоальбомы</span>
             </a>
             <?php endif; ?>
+        </div>
+    </div>
+</section>
+
+<section class="section news-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Последние новости</h2>
+            <p class="section-subtitle">Актуальные события и объявления</p>
+        </div>
+        <?php if (!empty($articles)): ?>
+        <div class="news-list">
+            <?php foreach (array_slice($articles, 0, 3) as $article): ?>
+                <?php
+                $fullText = $article['excerpt'] ?? strip_tags($article['content'] ?? '');
+                $excerpt = mb_substr($fullText, 0, 200);
+                ?>
+                <article class="news-item">
+                    <h2><a href="<?= route('news/' . $article['slug']) ?>"><?= htmlspecialchars($article['title']) ?></a></h2>
+                    <time class="news-date"><?= $article['published_at'] ? date('d.m.Y', strtotime($article['published_at'])) : '' ?></time>
+                    <?php if ($excerpt !== ''): ?>
+                    <p><?= htmlspecialchars($excerpt) ?><?= mb_strlen($fullText) > 200 ? '…' : '' ?></p>
+                    <?php endif; ?>
+                </article>
+            <?php endforeach; ?>
+        </div>
+        <?php else: ?>
+        <p class="text-muted">Новостей пока нет.</p>
+        <?php endif; ?>
+        <div class="text-center mt-4">
+            <a href="<?= route('news') ?>" class="btn btn-outline">Все новости →</a>
         </div>
     </div>
 </section>

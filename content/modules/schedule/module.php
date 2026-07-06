@@ -191,6 +191,14 @@ Hook::on('register_admin_routes', function ($router) use ($days) {
         if ($id) {
             $db->update('schedule', $data, 'id = ?', [$id]);
         } else {
+            if ($data['lesson_number'] < 1) {
+                $max = $db->fetch(
+                    'SELECT MAX(lesson_number) AS n FROM ' . $db->table('schedule')
+                    . ' WHERE class_name = ? AND day_of_week = ?',
+                    [$data['class_name'], $data['day_of_week']]
+                );
+                $data['lesson_number'] = ((int) ($max['n'] ?? 0)) + 1;
+            }
             $db->insert('schedule', $data);
         }
 
