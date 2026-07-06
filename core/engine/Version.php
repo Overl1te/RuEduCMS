@@ -17,15 +17,25 @@ class Version
     public static function get(): string
     {
         if (self::$version === null) {
-            $file = ROOT_PATH . '/VERSION';
-            if (is_file($file)) {
-                self::$version = trim((string) file_get_contents($file)) ?: '0.0.1';
-            } else {
-                self::$version = '0.0.1';
-            }
+            self::$version = self::readFromFile();
         }
 
         return self::$version;
+    }
+
+    public static function reset(): void
+    {
+        self::$version = null;
+    }
+
+    private static function readFromFile(): string
+    {
+        $file = ROOT_PATH . '/VERSION';
+        if (is_file($file)) {
+            return trim((string) file_get_contents($file)) ?: '0.0.1';
+        }
+
+        return '0.0.1';
     }
 
     public static function getDbVersion(): string

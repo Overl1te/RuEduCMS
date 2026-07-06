@@ -540,6 +540,7 @@ $router->get('/updates', function () use ($admin) {
         'backups' => Updater::listBackups(),
         'hasZip' => class_exists('ZipArchive'),
         'updateSource' => Config::get('update_source'),
+        'hasPendingUpdate' => Updater::hasPendingUpdate(),
     ]);
 });
 
@@ -563,25 +564,40 @@ $router->post('/updates/migrate', function () {
 $router->post('/updates/upload', function () {
     Auth::requireAdmin();
     if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Session::flash('error', 'Сессия истекла. Обновите страницу и повторите загрузку.');
         Router::redirect('admin/updates');
     }
 
-    if (empty($_FILES['package']) || $_FILES['package']['error'] !== UPLOAD_ERR_OK) {
-        Session::flash('error', 'Не удалось загрузить файл обновления');
+    if (empty($_FILES['package'])) {
+        Session::flash('error', 'Файл обновления не получен. Проверьте лимиты upload_max_filesize и post_max_size в PHP.');
+        Router::redirect('admin/updates');
+    }
+
+    $uploadError = (int) ($_FILES['package']['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($uploadError !== UPLOAD_ERR_OK) {
+        $message = match ($uploadError) {
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Файл слишком большой. Увеличьте upload_max_filesize и post_max_size в PHP.',
+            UPLOAD_ERR_PARTIAL => 'Файл загружен частично. Повторите попытку.',
+            UPLOAD_ERR_NO_FILE => 'Файл не выбран.',
+            default => 'Не удалось загрузить файл обновления (код ' . $uploadError . ').',
+        };
+        Session::flash('error', $message);
         Router::redirect('admin/updates');
     }
 
     $tmpPath = STORAGE_PATH . '/upload_' . uniqid() . '.zip';
     if (!move_uploaded_file($_FILES['package']['tmp_name'], $tmpPath)) {
-        Session::flash('error', 'Ошибка сохранения архива');
+        Session::flash('error', 'Ошибка сохранения архива. Проверьте права на запись в storage/.');
         Router::redirect('admin/updates');
     }
 
     $result = Updater::applyFromZip($tmpPath);
     if ($result['ok']) {
-        $msg = 'Обновление установлено. Версия: ' . ($result['version'] ?? Version::get());
+        $msg = !empty($result['staged'])
+            ? 'Архив принят. Установка завершится при переходе на следующую страницу.'
+            : 'Обновление установлено. Версия: ' . ($result['version'] ?? Version::get());
         if (!empty($result['backup'])) {
-            $msg .= '. Резервная копия: ' . basename($result['backup']);
+            $msg .= ' Резервная копия: ' . basename($result['backup']);
         }
         Session::flash('success', $msg);
     } else {

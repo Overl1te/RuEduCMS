@@ -7,7 +7,7 @@ namespace RuEdu\Engine;
 class YandexMap
 {
     private const WIDTH = 600;
-    private const HEIGHT = 450;
+    private const HEIGHT = 600;
 
     /**
      * Карта из настроек сайта (кэш на один запрос).

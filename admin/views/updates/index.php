@@ -56,6 +56,13 @@ $isUpToDate = Version::isUpToDate() && !$remoteUpdate;
 </div>
 <?php endif; ?>
 
+<?php if (!empty($hasPendingUpdate)): ?>
+<div class="alert alert-warning">
+    <i class="bi bi-hourglass-split"></i>
+    Обновление загружено и ожидает применения. Обновите страницу или откройте сайт заново.
+</div>
+<?php endif; ?>
+
 <?php if ($remoteUpdate): ?>
 <div class="alert alert-info">
     <i class="bi bi-cloud-download"></i>
@@ -75,7 +82,8 @@ $isUpToDate = Version::isUpToDate() && !$remoteUpdate;
                     <div class="alert alert-danger mb-0">Расширение PHP ZIP не установлено. Автоустановка недоступна.</div>
                 <?php else: ?>
                     <p class="text-muted small">
-                        Загрузите ZIP-архив с папками <code>core/</code> и <code>admin/</code>.
+                        Загрузите ZIP-архив с папками <code>core/</code> и <code>admin/</code>
+                        и файлом <code>VERSION</code> (номер версии должен быть выше текущего).
                         Папки <code>content/</code> и <code>config.php</code> не затрагиваются.
                     </p>
                     <form method="POST" action="<?= url('admin/updates/upload') ?>" enctype="multipart/form-data">

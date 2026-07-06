@@ -54,7 +54,7 @@ class Updater
     }
 
     /**
-     * @return array{ok: bool, error?: string, version?: string, backup?: string|null}
+     * @return array{ok: bool, error?: string, version?: string, backup?: string|null, staged?: bool}
      */
     public static function applyFromZip(string $zipPath): array
     {
@@ -67,12 +67,21 @@ class Updater
             return $validation;
         }
 
+        $writableCheck = self::ensureWritableTargets();
+        if (!$writableCheck['ok']) {
+            return $writableCheck;
+        }
+
         $backup = self::createBackup();
-        $tempDir = STORAGE_PATH . '/update_' . uniqid();
+        $pendingDir = STORAGE_PATH . '/pending_update';
+        $extractDir = $pendingDir . '/extracted';
 
         try {
-            if (!mkdir($tempDir, 0755, true) && !is_dir($tempDir)) {
-                throw new \RuntimeException('Не удалось создать временную папку');
+            if (is_dir($pendingDir)) {
+                ruedu_delete_directory($pendingDir);
+            }
+            if (!mkdir($extractDir, 0755, true) && !is_dir($extractDir)) {
+                throw new \RuntimeException('Не удалось создать папку для обновления');
             }
 
             $zip = new \ZipArchive();
@@ -80,42 +89,146 @@ class Updater
                 throw new \RuntimeException('Не удалось открыть архив обновления');
             }
 
-            $zip->extractTo($tempDir);
+            $zip->extractTo($extractDir);
             $zip->close();
 
-            $root = self::findPackageRoot($tempDir);
+            $root = self::findPackageRoot($extractDir);
             if ($root === null) {
                 throw new \RuntimeException('В архиве не найдены папки core/ и admin/');
             }
 
-            self::replaceDirectory($root . '/core', CORE_PATH);
-            self::replaceDirectory($root . '/admin', ADMIN_PATH);
+            $manifest = [
+                'root' => $root,
+                'version' => $validation['version'] ?? null,
+                'backup' => $backup,
+                'staged_at' => date('c'),
+            ];
 
-            if (is_file($root . '/VERSION')) {
-                copy($root . '/VERSION', ROOT_PATH . '/VERSION');
+            if (file_put_contents(
+                $pendingDir . '/manifest.json',
+                json_encode($manifest, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)
+            ) === false) {
+                throw new \RuntimeException('Не удалось сохранить манифест обновления');
             }
-
-            Migrate::run();
-            Cache::flush();
 
             return [
                 'ok' => true,
-                'version' => Version::get(),
+                'staged' => true,
+                'version' => $validation['version'] ?? null,
                 'backup' => $backup,
             ];
         } catch (\Throwable $e) {
+            if (is_dir($pendingDir)) {
+                ruedu_delete_directory($pendingDir);
+            }
+
             return [
                 'ok' => false,
                 'error' => $e->getMessage(),
                 'backup' => $backup,
             ];
         } finally {
-            if (is_dir($tempDir)) {
-                ruedu_delete_directory($tempDir);
-            }
             if (is_file($zipPath)) {
                 @unlink($zipPath);
             }
+        }
+    }
+
+    /**
+     * Применяет отложенное обновление до загрузки admin/index.php (важно для Windows).
+     *
+     * @return array{ok: bool, error?: string, version?: string}|null
+     */
+    public static function applyPending(): ?array
+    {
+        $pendingDir = STORAGE_PATH . '/pending_update';
+        $manifestFile = $pendingDir . '/manifest.json';
+
+        if (!is_file($manifestFile)) {
+            return null;
+        }
+
+        $lockFile = $pendingDir . '/.lock';
+        $lock = @fopen($lockFile, 'c');
+        if ($lock === false || !flock($lock, LOCK_EX)) {
+            if ($lock !== false) {
+                fclose($lock);
+            }
+            return null;
+        }
+
+        try {
+            if (!is_file($manifestFile)) {
+                return null;
+            }
+
+            $manifest = json_decode((string) file_get_contents($manifestFile), true);
+            $root = is_array($manifest) ? ($manifest['root'] ?? null) : null;
+            if (!is_string($root) || !is_dir($root . '/core') || !is_dir($root . '/admin')) {
+                throw new \RuntimeException('Пакет обновления повреждён или неполный');
+            }
+
+            $writableCheck = self::ensureWritableTargets();
+            if (!$writableCheck['ok']) {
+                throw new \RuntimeException($writableCheck['error'] ?? 'Нет прав на запись');
+            }
+
+            self::replaceDirectory($root . '/core', CORE_PATH);
+            self::replaceDirectory($root . '/admin', ADMIN_PATH);
+
+            if (is_file($root . '/VERSION')) {
+                self::copyFile($root . '/VERSION', ROOT_PATH . '/VERSION');
+                Version::reset();
+            }
+
+            Migrate::run();
+            Cache::flush();
+            self::clearPending($pendingDir);
+
+            return [
+                'ok' => true,
+                'version' => Version::get(),
+            ];
+        } catch (\Throwable $e) {
+            error_log('RuEduCMS update failed: ' . $e->getMessage());
+
+            return [
+                'ok' => false,
+                'error' => $e->getMessage(),
+            ];
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    public static function hasPendingUpdate(): bool
+    {
+        return is_file(STORAGE_PATH . '/pending_update/manifest.json');
+    }
+
+    /**
+     * @return array{ok: bool, error?: string}
+     */
+    private static function ensureWritableTargets(): array
+    {
+        foreach ([CORE_PATH => 'core/', ADMIN_PATH => 'admin/', ROOT_PATH . '/VERSION' => 'VERSION'] as $path => $label) {
+            $dir = is_file($path) ? dirname($path) : $path;
+            if (!is_dir($dir)) {
+                return ['ok' => false, 'error' => 'Папка ' . $label . ' не найдена'];
+            }
+            if (!is_writable($dir)) {
+                return ['ok' => false, 'error' => 'Нет прав на запись в ' . $label];
+            }
+        }
+
+        return ['ok' => true];
+    }
+
+    private static function clearPending(string $pendingDir): void
+    {
+        if (is_dir($pendingDir)) {
+            ruedu_delete_directory($pendingDir);
         }
     }
 
@@ -293,9 +406,7 @@ class Updater
                 if (is_dir($to)) {
                     ruedu_delete_directory($to);
                 }
-                if (!copy($from, $to)) {
-                    throw new \RuntimeException('Не удалось скопировать файл: ' . $item);
-                }
+                self::copyFile($from, $to);
             }
         }
 
@@ -311,6 +422,32 @@ class Updater
                     @unlink($path);
                 }
             }
+        }
+    }
+
+    private static function copyFile(string $from, string $to): void
+    {
+        if (@copy($from, $to)) {
+            self::invalidateOpcache($to);
+            return;
+        }
+
+        $data = file_get_contents($from);
+        if ($data === false) {
+            throw new \RuntimeException('Не удалось прочитать файл: ' . basename($from));
+        }
+
+        if (file_put_contents($to, $data) === false) {
+            throw new \RuntimeException('Не удалось скопировать файл: ' . basename($to));
+        }
+
+        self::invalidateOpcache($to);
+    }
+
+    private static function invalidateOpcache(string $file): void
+    {
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
         }
     }
 

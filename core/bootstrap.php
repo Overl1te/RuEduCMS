@@ -50,6 +50,20 @@ if (session_status() === PHP_SESSION_NONE) {
 
 \RuEdu\Engine\ErrorHandler::register();
 
+if (is_dir(STORAGE_PATH)) {
+    $pendingUpdate = \RuEdu\Engine\Updater::applyPending();
+    if ($pendingUpdate !== null) {
+        if ($pendingUpdate['ok']) {
+            \RuEdu\Engine\Session::flash(
+                'success',
+                'Обновление установлено. Версия: ' . ($pendingUpdate['version'] ?? \RuEdu\Engine\Version::get())
+            );
+        } elseif (!empty($pendingUpdate['error'])) {
+            \RuEdu\Engine\Session::flash('error', 'Ошибка обновления: ' . $pendingUpdate['error']);
+        }
+    }
+}
+
 /**
  * Подпись поля формы на русском языке.
  */
