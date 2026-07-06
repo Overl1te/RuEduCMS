@@ -42,7 +42,8 @@ return static function (\PDO $pdo, string $prefix): void {
     }
 
     if (Migrate::tableExists($pdo, $pages) && !Migrate::columnExists($pdo, $pages, 'field_data')) {
-        $pdo->exec("ALTER TABLE `{$pages}` ADD COLUMN `field_data` JSON NULL AFTER `content_blocks`");
+        $after = Migrate::columnExists($pdo, $pages, 'content_blocks') ? 'content_blocks' : 'content';
+        $pdo->exec("ALTER TABLE `{$pages}` ADD COLUMN `field_data` JSON NULL AFTER `{$after}`");
     }
 
     if (Migrate::tableExists($pdo, $pages) && Migrate::columnExists($pdo, $pages, 'content_mode')) {

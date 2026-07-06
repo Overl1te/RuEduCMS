@@ -828,8 +828,12 @@ $router->post('/updates/migrate', function () {
     Migrate::run();
     Cache::flush();
 
-    if (Version::needsDbUpdate()) {
-        Session::flash('error', 'Не все миграции выполнены. Проверьте логи сервера.');
+    if (Version::needsDbUpdate() || !empty(Version::getPendingMigrations())) {
+        $msg = 'Не все миграции выполнены.';
+        if (Migrate::getLastError()) {
+            $msg .= ' ' . Migrate::getLastError();
+        }
+        Session::flash('error', $msg);
     } else {
         Session::flash('success', 'Миграции базы данных выполнены. Версия БД: ' . Version::getDbVersion());
     }

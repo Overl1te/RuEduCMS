@@ -120,7 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $config['site_description'] = 'Сайт образовательного учреждения';
 
                     Config::save($config);
-                    Config::load();
 
                     Migrate::run();
 
