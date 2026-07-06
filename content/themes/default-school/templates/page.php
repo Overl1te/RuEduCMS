@@ -1,11 +1,13 @@
-<?php ob_start(); ?>
+<?php ob_start();
+$page_title = $page['title'];
+include __DIR__ . '/partials/page-header.php';
+?>
 <div class="container page-content">
-    <h1><?= htmlspecialchars($page['title']) ?></h1>
-    <div class="content-body">
+    <div class="content-body" data-animate>
         <?= $page['content'] ?>
     </div>
     <?php if (($page['slug'] ?? '') === 'informaciya'): ?>
-        <div class="map-section">
+        <div class="map-section" data-animate>
             <?php include __DIR__ . '/partials/yandex-map.php'; ?>
         </div>
     <?php endif; ?>

@@ -68,7 +68,6 @@ return [
     'timezone' => 'Europe/Moscow',
     'language' => 'ru',
     'debug' => false,
-    'scss_runtime' => false,
     'update_source' => null,
 ];
 ```
@@ -78,7 +77,7 @@ return [
 1. Создайте папку в `content/themes/`, например `content/themes/my-theme/`
 2. Добавьте `theme.json` с метаданными
 3. Создайте шаблоны в `content/themes/my-theme/templates/`
-4. Добавьте стили в `css/main.css` (или SCSS в `scss/`)
+4. Добавьте стили в `scss/main.scss` (CSS компилируется на сервере в `css/main.css`)
 5. Выберите тему в админке: Настройки → Тема оформления
 
 ## Создание модуля

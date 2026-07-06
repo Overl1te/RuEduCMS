@@ -1,8 +1,8 @@
 {
-    "name": "Школьная тема",
+    "name": "Школьная тема Premium",
     "slug": "default-school",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "author": "RuEduCMS",
-    "description": "Тема оформления для типового сайта образовательного учреждения",
+    "description": "Премиальная тема с анимациями, glassmorphism и полным охватом всех разделов CMS",
     "screenshot": "assets/screenshot.png"
 }

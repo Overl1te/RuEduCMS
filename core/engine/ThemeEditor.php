@@ -55,6 +55,10 @@ class ThemeEditor
                 continue;
             }
 
+            if (self::isHiddenFromEditor($slug, $relative)) {
+                continue;
+            }
+
             $files[] = $relative;
         }
 
@@ -101,6 +105,13 @@ class ThemeEditor
             return 'Не удалось сохранить файл. Проверьте права на запись.';
         }
 
+        if (str_ends_with(strtolower($relativePath), '.scss') && Scss::themeUsesScss($slug)) {
+            $compiled = Scss::writeCompiledCss($slug);
+            if ($compiled !== true) {
+                return $compiled;
+            }
+        }
+
         return true;
     }
 
@@ -111,7 +122,7 @@ class ThemeEditor
             return null;
         }
 
-        foreach (['templates/home.php', 'theme.json', 'css/main.css'] as $preferred) {
+        foreach (['templates/home.php', 'theme.json', 'scss/main.scss', 'css/main.css'] as $preferred) {
             if (in_array($preferred, $files, true)) {
                 return $preferred;
             }
@@ -147,6 +158,10 @@ class ThemeEditor
             return null;
         }
 
+        if (self::isHiddenFromEditor($slug, $relativePath)) {
+            return null;
+        }
+
         $absolute = $root . '/' . $relativePath;
         if (!is_file($absolute)) {
             return null;
@@ -176,6 +191,18 @@ class ThemeEditor
         $ext = strtolower(pathinfo($relativePath, PATHINFO_EXTENSION));
 
         return in_array($ext, self::EDITABLE_EXTENSIONS, true);
+    }
+
+    private static function isHiddenFromEditor(string $slug, string $relativePath): bool
+    {
+        if (!Scss::themeUsesScss($slug)) {
+            return false;
+        }
+
+        $path = str_replace('\\', '/', $relativePath);
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        return $ext === 'css' && str_starts_with($path, 'css/');
     }
 
     private static function relativePath(string $root, string $absolute): ?string

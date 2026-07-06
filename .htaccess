@@ -14,9 +14,12 @@ RewriteRule ^uploads/(.*)$ content/uploads/$1 [L]
 RewriteRule ^core/assets/(.*)$ core/assets/$1 [L]
 RewriteRule ^admin/assets/(.*)$ admin/assets/$1 [L]
 
+# Компиляция SCSS тем (публичный endpoint)
+RewriteRule ^core/scss\.php$ core/scss.php [L,QSA]
+
 # Защита ядра и служебных папок
 RewriteRule ^config(/.*)?$ error.php?code=403 [L,QSA]
-RewriteRule ^core/(?!assets/)(.*)$ error.php?code=403 [L,QSA]
+RewriteRule ^core/(?!assets/|scss\.php)(.*)$ error.php?code=403 [L,QSA]
 RewriteRule ^storage(/.*)?$ error.php?code=403 [L,QSA]
 RewriteRule ^content/modules(/.*)?$ error.php?code=403 [L,QSA]
 

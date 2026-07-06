@@ -1,16 +1,56 @@
-// RuEduCMS Theme JS
+// RuEduCMS Premium Theme JS
 document.addEventListener('DOMContentLoaded', function() {
-    // Mobile menu
-    const toggle = document.getElementById('menuToggle');
-    const nav = document.getElementById('mainNav');
-    if (toggle && nav) {
-        toggle.addEventListener('click', () => {
-            const open = nav.classList.toggle('open');
-            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        });
+    initPageLoader();
+    initMobileMenu();
+    initA11y();
+    initCookieBanner();
+    initScrollEffects();
+    initScrollReveal();
+    initParallax();
+    initCounterAnimation();
+    initAjaxForms();
+    initMapFrames();
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+});
+
+function initPageLoader() {
+    const loader = document.getElementById('pageLoader');
+    if (!loader) return;
+
+    const hide = function() {
+        loader.classList.add('is-done');
+        document.body.classList.remove('is-loading');
+    };
+
+    if (document.readyState === 'complete') {
+        setTimeout(hide, 400);
+    } else {
+        window.addEventListener('load', function() { setTimeout(hide, 300); });
     }
 
-    // A11y toggle
+    setTimeout(hide, 3000);
+}
+
+function initMobileMenu() {
+    const toggle = document.getElementById('menuToggle');
+    const nav = document.getElementById('mainNav');
+    if (!toggle || !nav) return;
+
+    toggle.addEventListener('click', function() {
+        const open = nav.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    nav.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+            nav.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+        });
+    });
+}
+
+function initA11y() {
     const a11yToggle = document.getElementById('a11yToggle');
     if (a11yToggle) {
         a11yToggle.addEventListener('click', function(e) {
@@ -19,18 +59,148 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Cookie banner
-    if (!localStorage.getItem('cookies_accepted')) {
-        const banner = document.getElementById('cookieBanner');
-        if (banner) banner.style.display = 'block';
-    }
-
-    // Restore a11y settings
     const fontSize = localStorage.getItem('a11y_font');
     const colorScheme = localStorage.getItem('a11y_color');
     if (fontSize) setFontSize(fontSize);
     if (colorScheme) setColorScheme(colorScheme);
+}
 
+function initCookieBanner() {
+    if (!localStorage.getItem('cookies_accepted')) {
+        const banner = document.getElementById('cookieBanner');
+        if (banner) banner.style.display = 'block';
+    }
+}
+
+function initScrollEffects() {
+    const header = document.querySelector('.site-header');
+    const progress = document.getElementById('scrollProgress');
+    const backToTop = document.getElementById('backToTop');
+    let ticking = false;
+
+    function onScroll() {
+        const scrollY = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+
+        if (header) {
+            header.classList.toggle('is-scrolled', scrollY > 40);
+        }
+
+        if (progress && docHeight > 0) {
+            progress.style.width = (scrollY / docHeight * 100) + '%';
+        }
+
+        if (backToTop) {
+            backToTop.classList.toggle('is-visible', scrollY > 500);
+        }
+
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            requestAnimationFrame(onScroll);
+            ticking = true;
+        }
+    }, { passive: true });
+
+    if (backToTop) {
+        backToTop.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    onScroll();
+}
+
+function initScrollReveal() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.querySelectorAll('[data-animate]').forEach(function(el) {
+            el.classList.add('is-visible');
+        });
+        return;
+    }
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -40px 0px'
+    });
+
+    document.querySelectorAll('[data-animate]').forEach(function(el) {
+        observer.observe(el);
+    });
+}
+
+function initParallax() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const orbs = document.querySelectorAll('[data-parallax]');
+    if (!orbs.length) return;
+
+    let ticking = false;
+
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            requestAnimationFrame(function() {
+                const scrollY = window.scrollY;
+                orbs.forEach(function(orb) {
+                    const speed = parseFloat(orb.getAttribute('data-parallax')) || 0.1;
+                    orb.style.transform = 'translateY(' + (scrollY * speed) + 'px)';
+                });
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+}
+
+function initCounterAnimation() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const counters = document.querySelectorAll('[data-count]');
+    if (!counters.length) return;
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (!entry.isIntersecting) return;
+
+            const el = entry.target;
+            const target = parseInt(el.getAttribute('data-count'), 10);
+            if (isNaN(target)) return;
+
+            const duration = 1500;
+            const start = performance.now();
+
+            function tick(now) {
+                const progress = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.round(target * eased) + '+';
+                if (progress < 1) requestAnimationFrame(tick);
+            }
+
+            requestAnimationFrame(tick);
+            observer.unobserve(el);
+        });
+    }, { threshold: 0.5 });
+
+    counters.forEach(function(el) { observer.observe(el); });
+}
+
+function updateHeaderHeight() {
+    const header = document.querySelector('.site-header');
+    if (header) {
+        document.documentElement.style.setProperty('--header-height', header.offsetHeight + 'px');
+    }
+}
+
+function initMapFrames() {
     document.querySelectorAll('.map-container__embed iframe').forEach(function(frame) {
         frame.style.removeProperty('display');
         frame.style.removeProperty('visibility');
@@ -38,7 +208,9 @@ document.addEventListener('DOMContentLoaded', function() {
             frame.style.setProperty('display', 'block', 'important');
         }
     });
+}
 
+function initAjaxForms() {
     document.querySelectorAll('[data-ajax-form]').forEach(function(form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -85,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     });
-});
+}
 
 function toggleA11y() {
     const panel = document.getElementById('a11yPanel');
@@ -112,12 +284,14 @@ function setColorScheme(scheme) {
 
 function acceptCookies() {
     localStorage.setItem('cookies_accepted', '1');
-    document.getElementById('cookieBanner').style.display = 'none';
+    const banner = document.getElementById('cookieBanner');
+    if (banner) banner.style.display = 'none';
 }
 
 function declineCookies() {
     localStorage.setItem('cookies_accepted', '0');
-    document.getElementById('cookieBanner').style.display = 'none';
+    const banner = document.getElementById('cookieBanner');
+    if (banner) banner.style.display = 'none';
 }
 
 function showToast(message, type) {
@@ -143,6 +317,6 @@ function showToast(message, type) {
 
     setTimeout(function() {
         toast.classList.remove('show');
-        setTimeout(function() { toast.remove(); }, 300);
+        setTimeout(function() { toast.remove(); }, 400);
     }, 4000);
 }

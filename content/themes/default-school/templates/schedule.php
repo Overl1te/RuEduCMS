@@ -1,8 +1,11 @@
-<?php ob_start(); ?>
+<?php ob_start();
+$page_title = 'Расписание занятий';
+$page_breadcrumb = 'Расписание';
+include __DIR__ . '/partials/page-header.php';
+?>
 <div class="container page-content">
-    <h1>Расписание занятий</h1>
     <?php if (!empty($classes)): ?>
-        <div class="schedule-filter">
+        <div class="schedule-filter" data-animate>
             <form method="GET">
                 <select name="class" onchange="this.form.submit()">
                     <?php foreach ($classes as $c): ?>
@@ -11,6 +14,7 @@
                 </select>
             </form>
         </div>
+        <div data-animate data-animate-delay="2" style="overflow-x:auto">
         <table class="schedule-table">
             <thead>
                 <tr><th>Урок</th><?php foreach ($days as $d): ?><th><?= $d ?></th><?php endforeach; ?></tr>
@@ -35,8 +39,9 @@
                 <?php endfor; ?>
             </tbody>
         </table>
+        </div>
     <?php else: ?>
-        <p>Расписание пока не добавлено.</p>
+        <p data-animate>Расписание пока не добавлено.</p>
     <?php endif; ?>
 </div>
 <?php $content = ob_get_clean();

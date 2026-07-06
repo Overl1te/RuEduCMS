@@ -31,6 +31,11 @@ class FrontController
     {
         $relative = self::relativePath();
 
+        if ($relative === 'core/scss.php') {
+            require CORE_PATH . '/scss.php';
+            return true;
+        }
+
         if (self::isDenied($relative)) {
             ErrorPage::send(403);
             return true;

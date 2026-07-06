@@ -1,7 +1,10 @@
-<?php ob_start(); ?>
+<?php ob_start();
+$page_title = 'Сведения об образовательной организации';
+$page_breadcrumb = 'Сведения об ОО';
+include __DIR__ . '/partials/page-header.php';
+?>
 <div class="container page-content">
-    <h1>Сведения об образовательной организации</h1>
-    <nav class="sveden-nav">
+    <nav class="sveden-nav" data-animate>
         <ul>
             <?php foreach ($sectionList as $key => $label): ?>
                 <li><a href="#section-<?= $key ?>"><?= htmlspecialchars($label) ?></a></li>

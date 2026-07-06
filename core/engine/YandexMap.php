@@ -6,6 +6,7 @@ namespace RuEdu\Engine;
 
 class YandexMap
 {
+    private const WIDTH = 600;
     private const HEIGHT = 450;
 
     /**
@@ -152,9 +153,10 @@ class YandexMap
         }
 
         $src = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
+        $width = self::WIDTH;
         $height = self::HEIGHT;
 
-        return '<iframe class="yandex-map-frame" src="' . $src . '" width="100%" height="' . $height . '"'
+        return '<iframe class="yandex-map-frame" src="' . $src . '" width="' . $width . '" height="' . $height . '"'
             . ' frameborder="0" allowfullscreen="true" loading="lazy" title="Карта"></iframe>';
     }
 

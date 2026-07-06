@@ -1,20 +1,22 @@
-<?php ob_start(); ?>
+<?php ob_start();
+$page_title = 'Контакты';
+$page_breadcrumb = 'Контакты';
+include __DIR__ . '/partials/page-header.php';
+?>
 <div class="container page-content">
-    <h1>Контакты</h1>
     <div class="contacts-layout">
-        <div class="contacts-info">
+        <div class="contacts-info" data-animate>
             <h3><?= htmlspecialchars(\RuEdu\Engine\Config::get('site_name', '')) ?></h3>
             <?php if ($address): ?><p><strong>Адрес:</strong> <?= htmlspecialchars($address) ?></p><?php endif; ?>
             <?php if ($phone): ?><p><strong>Телефон:</strong> <a href="tel:<?= htmlspecialchars($phone) ?>"><?= htmlspecialchars($phone) ?></a></p><?php endif; ?>
             <?php if ($email): ?><p><strong>Email:</strong> <a href="mailto:<?= htmlspecialchars($email) ?>"><?= htmlspecialchars($email) ?></a></p><?php endif; ?>
         </div>
-        <div class="contacts-map">
+        <div class="contacts-map" data-animate data-animate-delay="2">
             <?php $show_map_empty = true; include __DIR__ . '/partials/yandex-map.php'; ?>
         </div>
     </div>
-    <hr class="my-4">
-    <h2>Обратная связь</h2>
-    <form method="POST" action="<?= route('forms/submit/contact') ?>" class="contact-form" data-ajax-form style="max-width:500px">
+    <h2 data-animate>Обратная связь</h2>
+    <form method="POST" action="<?= route('forms/submit/contact') ?>" class="contact-form" data-ajax-form data-animate style="max-width:560px">
         <div class="form-group"><label>Имя</label><input type="text" name="name" required></div>
         <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
         <div class="form-group"><label>Сообщение</label><textarea name="message" rows="4" required></textarea></div>

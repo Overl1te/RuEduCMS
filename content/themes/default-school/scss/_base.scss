@@ -1,0 +1,143 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--font-body);
+    font-size: var(--font-size);
+    color: var(--text);
+    background: var(--bg);
+    background-image: var(--bg-mesh);
+    background-attachment: fixed;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+body.is-loading { overflow: hidden; }
+
+img { max-width: 100%; height: auto; display: block; }
+
+a {
+    color: var(--primary);
+    transition: color var(--transition);
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.icon {
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.text-center { text-align: center; }
+.text-muted { color: var(--text-muted); }
+.mt-4 { margin-top: 28px; }
+.mb-4 { margin-bottom: 28px; }
+.my-4 { margin: 28px 0; }
+
+hr {
+    border: none;
+    border-top: 1px solid var(--border-light);
+    margin: 32px 0;
+}
+
+// Page loader
+.page-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-dark);
+    transition: opacity .5s var(--ease-out), visibility .5s;
+}
+
+.page-loader.is-done {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.page-loader__ring {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, .15);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin-slow .8s linear infinite;
+}
+
+// Scroll progress
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent-coral), var(--primary-light));
+    z-index: 10001;
+    transition: width .1s linear;
+    box-shadow: 0 0 12px var(--primary-glow);
+}
+
+// Back to top
+.back-to-top {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    cursor: pointer;
+    z-index: 900;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px) scale(.9);
+    transition: all var(--transition);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-to-top.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.back-to-top:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+.badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--bg-alt), var(--border-light));
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}

@@ -664,7 +664,11 @@ $router->post('/themes/save', function () {
     }
 
     Cache::flush();
-    Session::flash('success', 'Файл сохранён: ' . $file);
+    $message = 'Файл сохранён: ' . $file;
+    if (str_ends_with(strtolower($file), '.scss')) {
+        $message .= '. CSS скомпилирован';
+    }
+    Session::flash('success', $message);
     Router::redirect('admin/themes/edit/' . rawurlencode($slug) . '?file=' . rawurlencode($file));
 });
 

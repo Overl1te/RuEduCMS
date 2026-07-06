@@ -63,9 +63,11 @@ class Template
 
     public function cssUrl(): string
     {
-        if (Config::get('scss_runtime', false) && file_exists($this->themePath . '/scss/main.scss')) {
-            return Router::asset('core/scss.php?theme=' . basename($this->themePath));
+        $theme = basename($this->themePath);
+        if (Scss::themeUsesScss($theme)) {
+            return Router::asset('core/scss.php?theme=' . rawurlencode($theme));
         }
+
         return $this->asset('css/main.css');
     }
 
