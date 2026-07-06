@@ -39,7 +39,7 @@ CMS для создания сайтов образовательных учре
 
 ```
 RuEduCMS/
-├── config.php         # Конфигурация (создаётся установщиком, не в git)
+├── config.php         # Конфигурация (в репозитории, донастраивается установщиком)
 ├── index.php          # Точка входа
 ├── admin/             # Админ-панель (как wp-admin)
 ├── install/           # Установщик (удаляется после setup)
@@ -57,27 +57,30 @@ RuEduCMS/
 
 **Правило:** при обновлениях CMS заменяется только `core/` и `admin/`. Папку `content/` и `config.php` не трогать.
 
-## Пример config.php
+Перед установкой можно отредактировать `config.php` вручную (БД, тема, часовой пояс) — установщик подставит значения в форму и допишет недостающее. Если файла нет, установщик создаст его сам.
+
+## config.php
 
 ```php
 <?php
 
 return [
     'db_host' => 'localhost',
-    'db_name' => 'rueducms',
-    'db_user' => 'root',
+    'db_name' => '',
+    'db_user' => '',
     'db_pass' => '',
     'db_prefix' => 'rc_',
-    'site_url' => 'http://localhost/RuEduCMS',
-    'base_path' => '/RuEduCMS',
-    'site_name' => 'МБОУ СОШ №1',
+    'site_url' => '',
+    'base_path' => '',
+    'site_name' => 'Мой сайт',
     'site_description' => 'Сайт образовательного учреждения',
-    'admin_email' => 'admin@school.ru',
+    'admin_email' => '',
     'timezone' => 'Europe/Moscow',
     'theme' => 'default-school',
     'language' => 'ru',
-    'installed' => true,
-    'secret_key' => '...',
+    'debug' => false,
+    'installed' => false,
+    'secret_key' => '',
     'cache_enabled' => true,
     'scss_runtime' => false,
 ];

@@ -33,9 +33,9 @@ declare(strict_types=1);
     $relative = substr($scriptPath, strlen($rootPrefix));
     $allowed = [
         'index.php',
+        'error.php',
         'admin/index.php',
         'install/index.php',
-        'core/handler.php',
     ];
 
     if (!in_array($relative, $allowed, true)) {

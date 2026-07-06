@@ -13,6 +13,7 @@ define('UPLOADS_PATH', CONTENT_PATH . '/uploads');
 define('LANGUAGES_PATH', CONTENT_PATH . '/languages');
 define('ADMIN_PATH', ROOT_PATH . '/admin');
 define('STORAGE_PATH', ROOT_PATH . '/storage');
+define('CONFIG_FILE', ROOT_PATH . '/config.php');
 
 $versionFile = ROOT_PATH . '/VERSION';
 define('RUEDU_VERSION', is_file($versionFile) ? (trim((string) file_get_contents($versionFile)) ?: '0.0.1') : '0.0.1');
@@ -37,8 +38,9 @@ date_default_timezone_set('Europe/Moscow');
 
 // Миграция: старый config/config.php → config.php в корне
 $legacyConfig = ROOT_PATH . '/config/config.php';
-if (!file_exists(ROOT_PATH . '/config.php') && file_exists($legacyConfig)) {
-    copy($legacyConfig, ROOT_PATH . '/config.php');
+if (!file_exists(CONFIG_FILE) && file_exists($legacyConfig)) {
+    rename($legacyConfig, CONFIG_FILE);
+    @rmdir(ROOT_PATH . '/config');
 }
 
 if (session_status() === PHP_SESSION_NONE) {

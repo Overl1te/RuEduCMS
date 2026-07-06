@@ -13,6 +13,7 @@ class FrontController
     ];
 
     private const DENIED_PREFIXES = [
+        'config/',
         'core/',
         'storage/',
         'content/modules/',
@@ -36,8 +37,8 @@ class FrontController
             return true;
         }
 
-        if ($relative === 'core/handler.php') {
-            require CORE_PATH . '/handler.php';
+        if ($relative === 'error.php') {
+            ErrorPage::send(ErrorPage::detectCode());
             return true;
         }
 
@@ -78,10 +79,6 @@ class FrontController
     {
         if ($relative === 'config.php') {
             return true;
-        }
-
-        if ($relative === 'core/handler.php') {
-            return false;
         }
 
         foreach (self::DENIED_PREFIXES as $prefix) {

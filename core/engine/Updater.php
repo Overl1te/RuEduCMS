@@ -191,9 +191,8 @@ class Updater
             return null;
         }
 
-        $configFile = ROOT_PATH . '/config.php';
-        if (file_exists($configFile)) {
-            $zip->addFile($configFile, 'config.php');
+        if (file_exists(CONFIG_FILE)) {
+            $zip->addFile(CONFIG_FILE, 'config.php');
         }
 
         self::addDirToZip($zip, UPLOADS_PATH, 'uploads');

@@ -9,10 +9,45 @@ class Config
     private static ?array $data = null;
     private static string $configFile = '';
 
+    /** Базовые значения для нового config.php */
+    public static function defaults(): array
+    {
+        return [
+            'db_host' => 'localhost',
+            'db_name' => '',
+            'db_user' => '',
+            'db_pass' => '',
+            'db_prefix' => 'rc_',
+            'site_url' => '',
+            'base_path' => '',
+            'site_name' => 'Мой сайт',
+            'site_description' => 'Сайт образовательного учреждения',
+            'admin_email' => '',
+            'timezone' => 'Europe/Moscow',
+            'theme' => 'default-school',
+            'language' => 'ru',
+            'debug' => false,
+            'installed' => false,
+            'secret_key' => '',
+            'cache_enabled' => true,
+            'scss_runtime' => false,
+            'db_version' => '0.0.1',
+            'update_source' => null,
+        ];
+    }
+
+    public static function ensureFileExists(): bool
+    {
+        if (file_exists(self::configFile())) {
+            return true;
+        }
+        return self::save(self::defaults());
+    }
+
     private static function configFile(): string
     {
         if (self::$configFile === '') {
-            self::$configFile = ROOT_PATH . '/config.php';
+            self::$configFile = CONFIG_FILE;
         }
         return self::$configFile;
     }
@@ -47,7 +82,7 @@ class Config
     public static function save(array $config): bool
     {
         self::$data = $config;
-        $content = "<?php\n\nreturn " . var_export($config, true) . ";\n";
+        $content = "<?php\n\ndeclare(strict_types=1);\n\nreturn " . var_export($config, true) . ";\n";
         return (bool) file_put_contents(self::configFile(), $content, LOCK_EX);
     }
 

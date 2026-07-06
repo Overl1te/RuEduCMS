@@ -69,7 +69,7 @@ class ErrorHandler
 
     private static function isDebug(): bool
     {
-        if (!file_exists(ROOT_PATH . '/config.php')) {
+        if (!file_exists(CONFIG_FILE)) {
             return self::isInstallRequest();
         }
 

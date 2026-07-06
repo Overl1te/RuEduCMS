@@ -71,23 +71,23 @@ $assetBase = \RuEdu\Engine\Router::path('install/assets/');
             <form method="POST" data-install-check data-messages='["Проверка подключения…","Установка соединения…","Готово!"]'>
                 <div class="form-group">
                     <label for="db_host">Хост БД</label>
-                    <input type="text" id="db_host" name="db_host" value="localhost" required>
+                    <input type="text" id="db_host" name="db_host" value="<?= htmlspecialchars($installConfig['db_host'] ?? 'localhost') ?>" required>
                 </div>
                 <div class="form-group">
                     <label for="db_name">Имя базы данных</label>
-                    <input type="text" id="db_name" name="db_name" required placeholder="база_данных">
+                    <input type="text" id="db_name" name="db_name" value="<?= htmlspecialchars($installConfig['db_name'] ?? '') ?>" required placeholder="база_данных">
                 </div>
                 <div class="form-group">
                     <label for="db_user">Пользователь</label>
-                    <input type="text" id="db_user" name="db_user" required>
+                    <input type="text" id="db_user" name="db_user" value="<?= htmlspecialchars($installConfig['db_user'] ?? '') ?>" required>
                 </div>
                 <div class="form-group">
                     <label for="db_pass">Пароль</label>
-                    <input type="password" id="db_pass" name="db_pass">
+                    <input type="password" id="db_pass" name="db_pass" value="<?= htmlspecialchars($installConfig['db_pass'] ?? '') ?>">
                 </div>
                 <div class="form-group">
                     <label for="db_prefix">Префикс таблиц</label>
-                    <input type="text" id="db_prefix" name="db_prefix" value="rc_">
+                    <input type="text" id="db_prefix" name="db_prefix" value="<?= htmlspecialchars($installConfig['db_prefix'] ?? 'rc_') ?>">
                 </div>
                 <div class="actions">
                     <button type="submit" class="btn">
@@ -113,12 +113,13 @@ $assetBase = \RuEdu\Engine\Router::path('install/assets/');
             <form method="POST" data-install-loading data-messages='["Сохранение конфигурации…","Создание администратора…","Подготовка панели…","Завершение…"]'>
                 <div class="form-group">
                     <label for="site_name">Название сайта</label>
-                    <input type="text" id="site_name" name="site_name" required placeholder="МБОУ СОШ №1">
+                    <input type="text" id="site_name" name="site_name" required placeholder="МБОУ СОШ №1"
+                           value="<?= htmlspecialchars($installConfig['site_name'] ?? 'Мой сайт') ?>">
                 </div>
                 <div class="form-group">
                     <label for="site_url">URL сайта</label>
                     <input type="url" id="site_url" name="site_url" required placeholder="https://школа.образование.рф"
-                           value="<?= htmlspecialchars(\RuEdu\Engine\Router::detectSiteUrl()) ?>">
+                           value="<?= htmlspecialchars($installConfig['site_url'] !== '' ? $installConfig['site_url'] : \RuEdu\Engine\Router::detectSiteUrl()) ?>">
                 </div>
                 <hr class="form-divider">
                 <div class="form-group">
@@ -128,7 +129,8 @@ $assetBase = \RuEdu\Engine\Router::path('install/assets/');
                 </div>
                 <div class="form-group">
                     <label for="admin_email">Email администратора</label>
-                    <input type="email" id="admin_email" name="admin_email" required>
+                    <input type="email" id="admin_email" name="admin_email" required
+                           value="<?= htmlspecialchars($installConfig['admin_email'] ?? '') ?>">
                 </div>
                 <div class="form-group">
                     <label for="admin_password">Пароль</label>

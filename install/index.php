@@ -16,6 +16,9 @@ if (Config::isInstalled()) {
     Router::redirect('');
 }
 
+Config::ensureFileExists();
+$installConfig = Config::load();
+
 $step = (int) ($_GET['step'] ?? 1);
 $errors = [];
 $success = false;
@@ -90,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($errors)) {
                 try {
-                    $config = [
+                    $config = array_merge(Config::load(), [
                         'db_host' => $dbConfig['host'],
                         'db_name' => $dbConfig['name'],
                         'db_user' => $dbConfig['user'],
@@ -99,19 +102,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'site_url' => $siteUrl,
                         'base_path' => $basePath,
                         'site_name' => $siteName,
-                        'site_description' => 'Сайт образовательного учреждения',
                         'admin_email' => $adminEmail,
-                        'timezone' => 'Europe/Moscow',
-                        'theme' => 'default-school',
-                        'language' => 'ru',
-                        'debug' => false,
                         'installed' => true,
-                        'secret_key' => bin2hex(random_bytes(32)),
-                        'cache_enabled' => true,
-                        'scss_runtime' => false,
                         'db_version' => Version::getLatestMigrationVersion(),
-                        'update_source' => null,
-                    ];
+                    ]);
+
+                    if ($config['secret_key'] === '') {
+                        $config['secret_key'] = bin2hex(random_bytes(32));
+                    }
 
                     Config::save($config);
 
@@ -161,9 +159,11 @@ function checkRequirements(): array
         ];
     }
     $checks['config_writable'] = [
-        'label' => 'Корневая папка доступна для записи (config.php)',
-        'ok' => is_writable(ROOT_PATH),
-        'value' => is_writable(ROOT_PATH) ? 'Да' : 'Нет',
+        'label' => 'config.php доступен для записи',
+        'ok' => file_exists(CONFIG_FILE) ? is_writable(CONFIG_FILE) : is_writable(ROOT_PATH),
+        'value' => file_exists(CONFIG_FILE)
+            ? (is_writable(CONFIG_FILE) ? 'Да' : 'Нет')
+            : (is_writable(ROOT_PATH) ? 'Будет создан' : 'Нет'),
     ];
     $checks['uploads_writable'] = [
         'label' => 'Папка загрузок доступна для записи',
