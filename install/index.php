@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'site_name' => $siteName,
                         'admin_email' => $adminEmail,
                         'installed' => true,
-                        'db_version' => Version::getLatestMigrationVersion(),
+                        'db_version' => '0.0.0',
                     ]);
 
                     if ($config['secret_key'] === '') {
@@ -120,6 +120,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $config['site_description'] = 'Сайт образовательного учреждения';
 
                     Config::save($config);
+                    Config::load();
+
+                    Migrate::run();
 
                     $pdo = Database::createConnection($dbConfig['host'], $dbConfig['name'], $dbConfig['user'], $dbConfig['pass']);
                     $prefix = $dbConfig['prefix'];
