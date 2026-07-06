@@ -14,8 +14,7 @@
                 <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf_token) ?>">
                 <div class="mb-3">
                     <label class="form-label">Логин</label>
-                    <input type="text" name="login" class="form-control" required autofocus autocomplete="username"
-                           placeholder="администратор">
+                    <input type="text" name="login" class="form-control" required autofocus autocomplete="username">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Пароль</label>

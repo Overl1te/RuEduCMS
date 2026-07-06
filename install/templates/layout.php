@@ -123,7 +123,7 @@ $assetBase = \RuEdu\Engine\Router::path('install/assets/');
                 <hr class="form-divider">
                 <div class="form-group">
                     <label for="admin_login">Логин администратора</label>
-                    <input type="text" id="admin_login" name="admin_login" required pattern="[a-zA-Z0-9._-]+" placeholder="admin">
+                    <input type="text" id="admin_login" name="admin_login" required pattern="[a-zA-Z0-9._-]+">
                     <small>Латиница, цифры, точка, дефис, подчёркивание</small>
                 </div>
                 <div class="form-group">
