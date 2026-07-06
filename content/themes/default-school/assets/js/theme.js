@@ -10,9 +10,23 @@ document.addEventListener('DOMContentLoaded', function() {
     initCounterAnimation();
     initAjaxForms();
     initMapFrames();
+    initRevealFooter();
     updateHeaderHeight();
-    window.addEventListener('resize', updateHeaderHeight);
+    window.addEventListener('resize', function() {
+        updateHeaderHeight();
+        initRevealFooter();
+    });
 });
+
+function initRevealFooter() {
+    const footer = document.querySelector('.site-footer');
+    if (!footer) return;
+
+    const height = footer.offsetHeight;
+    document.documentElement.style.setProperty('--footer-reveal-height', height + 'px');
+}
+
+window.addEventListener('load', initRevealFooter);
 
 function initPageLoader() {
     const loader = document.getElementById('pageLoader');

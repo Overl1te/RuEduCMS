@@ -14,10 +14,6 @@
             <a href="<?= route('contacts') ?>" class="btn btn-outline">Контакты</a>
         </div>
     </div>
-    <div class="hero-scroll" aria-hidden="true">
-        <div class="hero-scroll__mouse"></div>
-        <span>Листайте</span>
-    </div>
 </section>
 
 <div class="stats-strip">

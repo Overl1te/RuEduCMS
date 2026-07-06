@@ -140,45 +140,6 @@
     animation: hero-text-in .8s var(--ease-out) .3s both;
 }
 
-.hero-scroll {
-    position: absolute;
-    bottom: 56px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: rgba(255, 255, 255, .5);
-    font-size: 11px;
-    letter-spacing: .15em;
-    text-transform: uppercase;
-    animation: fade-up 1s var(--ease-out) 1s both;
-    z-index: 3;
-    pointer-events: none;
-}
-
-.hero-scroll__mouse {
-    width: 24px;
-    height: 38px;
-    border: 2px solid rgba(255, 255, 255, .35);
-    border-radius: 12px;
-    position: relative;
-}
-
-.hero-scroll__mouse::after {
-    content: '';
-    position: absolute;
-    top: 8px;
-    left: 50%;
-    width: 4px;
-    height: 8px;
-    background: var(--accent);
-    border-radius: 4px;
-    transform: translateX(-50%);
-    animation: scroll-wheel 1.5s ease infinite;
-}
-
 // Stats strip
 .stats-strip {
     background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(59, 130, 246, .04) 0%, transparent 60%);
@@ -798,7 +759,7 @@
 .contacts-map { min-width: 0; }
 
 .map-container {
-    width: 100%;
+    width: 600px;
     max-width: 100%;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
@@ -808,8 +769,9 @@
 
 .map-container__embed {
     position: relative;
-    width: 100%;
-    height: 600px;
+    width: 600px;
+    max-width: 100%;
+    height: 450px;
     overflow: hidden;
 }
 
@@ -1076,8 +1038,6 @@
         min-height: auto;
     }
 
-    .hero-scroll { display: none; }
-
     .stats-strip { margin-top: -24px; padding: 0 16px; }
 
     .stats-grid { grid-template-columns: 1fr 1fr; }
@@ -1092,7 +1052,19 @@
 
     .sveden-nav ul { columns: 1; }
 
-    .footer-grid { grid-template-columns: 1fr; }
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .footer-watermark {
+        font-size: clamp(3rem, 18vw, 6rem);
+    }
+
+    .site-canvas {
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        margin-bottom: var(--footer-reveal-height, 480px);
+    }
 
     .footer-bottom {
         flex-direction: column;

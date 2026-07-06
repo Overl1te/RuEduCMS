@@ -6,15 +6,25 @@ body {
     font-family: var(--font-body);
     font-size: var(--font-size);
     color: var(--text);
-    background: var(--bg);
-    background-image: var(--bg-mesh);
-    background-attachment: fixed;
+    background: var(--primary-dark);
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
 }
 
 body.is-loading { overflow: hidden; }
+
+// Reveal footer: контент «съезжает» вверх, футер остаётся на месте
+.site-canvas {
+    position: relative;
+    z-index: 2;
+    background: var(--bg);
+    background-image: var(--bg-mesh);
+    background-attachment: fixed;
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    box-shadow: 0 32px 80px rgba(0, 0, 0, .28);
+    margin-bottom: var(--footer-reveal-height, 420px);
+}
 
 img { max-width: 100%; height: auto; display: block; }
 

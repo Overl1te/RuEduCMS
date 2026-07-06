@@ -16,19 +16,21 @@
         <div class="page-loader__ring"></div>
     </div>
     <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+    <div class="site-canvas">
     <?= \RuEdu\Engine\AdminBar::render([
         'page' => $page ?? null,
         'article' => $article ?? null,
     ]) ?>
     <?php include __DIR__ . '/partials/header.php'; ?>
+    <?php include __DIR__ . '/partials/a11y.php'; ?>
     <div class="page-layout<?= !empty($side_menu) ? ' has-sidebar' : '' ?>">
         <?php include __DIR__ . '/partials/sidebar.php'; ?>
         <main class="main-content">
             <?= $content ?? '' ?>
         </main>
     </div>
+    </div>
     <?php include __DIR__ . '/partials/footer.php'; ?>
-    <?php include __DIR__ . '/partials/a11y.php'; ?>
     <?php include __DIR__ . '/partials/cookie-banner.php'; ?>
     <button type="button" class="back-to-top" id="backToTop" aria-label="Наверх" title="Наверх">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 15l-6-6-6 6"/></svg>
