@@ -19,7 +19,6 @@ Hook::on('register_routes', function ($router) {
             'phone' => Setting::get('contact_phone', Config::get('contact_phone', '')),
             'address' => Setting::get('contact_address', Config::get('contact_address', '')),
             'email' => Config::get('admin_email', ''),
-            'yandex_map' => Setting::get('yandex_map', ''),
             'meta' => SEO::metaTags(['title' => 'Контакты — ' . Config::get('site_name')]),
         ])->render('contacts');
     });

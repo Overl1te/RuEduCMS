@@ -96,6 +96,41 @@ function scheduleFetchSubjects(Database $db): array
     return array_column($rows, 'subject');
 }
 
+function scheduleReorderLessons(Database $db, string $className, int $dayOfWeek, array $order): bool
+{
+    if ($className === '' || $dayOfWeek < 1) {
+        return false;
+    }
+
+    $order = array_values(array_unique(array_filter(array_map('intval', $order), static fn (int $id) => $id > 0)));
+    if ($order === []) {
+        return false;
+    }
+
+    $rows = $db->fetchAll(
+        'SELECT id FROM ' . $db->table('schedule') . ' WHERE class_name = ? AND day_of_week = ? ORDER BY lesson_number',
+        [$className, $dayOfWeek]
+    );
+    $expectedIds = array_map(static fn (array $row) => (int) $row['id'], $rows);
+
+    $sortedOrder = $order;
+    $sortedExpected = $expectedIds;
+    sort($sortedOrder);
+    sort($sortedExpected);
+    if ($sortedOrder !== $sortedExpected) {
+        return false;
+    }
+
+    foreach ($order as $index => $id) {
+        $db->update('schedule', ['lesson_number' => 1000 + $index], 'id = ?', [$id]);
+    }
+    foreach ($order as $index => $id) {
+        $db->update('schedule', ['lesson_number' => $index + 1], 'id = ?', [$id]);
+    }
+
+    return true;
+}
+
 Hook::on('register_routes', function ($router) use ($days) {
     $router->get('/schedule', function () use ($days) {
         $db = Database::getInstance();
@@ -204,6 +239,46 @@ Hook::on('register_admin_routes', function ($router) use ($days) {
 
         Session::flash('success', 'Сохранено');
         Router::redirect('admin/schedule?class=' . urlencode($data['class_name']));
+    });
+
+    $router->post('/schedule/reorder', function () {
+        Auth::requireEditor();
+        $isAjax = ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest';
+
+        if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+            if ($isAjax) {
+                http_response_code(403);
+                header('Content-Type: application/json');
+                echo json_encode(['ok' => false], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            Router::redirect('admin/schedule');
+        }
+
+        $className = trim($_POST['class_name'] ?? '');
+        $dayOfWeek = (int) ($_POST['day_of_week'] ?? 1);
+        $order = json_decode($_POST['order'] ?? '[]', true);
+        if (!is_array($order)) {
+            $order = [];
+        }
+
+        $db = Database::getInstance();
+        $ok = scheduleReorderLessons($db, $className, $dayOfWeek, $order);
+
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => $ok], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if ($ok) {
+            Session::flash('success', 'Порядок уроков обновлён');
+        }
+        $redirect = 'admin/schedule';
+        if ($className !== '') {
+            $redirect .= '?class=' . urlencode($className);
+        }
+        Router::redirect($redirect);
     });
 
     $router->post('/schedule/delete/{id}', function ($p) {

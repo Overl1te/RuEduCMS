@@ -147,6 +147,29 @@ table td { vertical-align: middle; }
     font-weight: 600;
     width: 2.5rem;
 }
+.schedule-drag-handle {
+    cursor: grab;
+    text-align: center;
+    color: var(--bs-secondary);
+    user-select: none;
+    width: 28px;
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+}
+.schedule-drag-handle:active {
+    cursor: grabbing;
+}
+.schedule-drag-handle .bi {
+    font-size: 1rem;
+    line-height: 1;
+    pointer-events: none;
+}
+.schedule-lesson-row--dragging {
+    opacity: 0.55;
+}
+.schedule-lesson-row--over td {
+    border-top: 2px solid var(--bs-primary);
+}
 
 .autocomplete-wrap {
     position: relative;

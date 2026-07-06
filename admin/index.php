@@ -693,9 +693,16 @@ $router->post('/settings/save', function () {
              'contact_address', 'theme', 'cache_enabled', 'fz152_text', 'cookie_text', 'yandex_map'];
 
     foreach ($keys as $key) {
-        if (isset($_POST[$key])) {
-            Setting::set($key, trim($_POST[$key]));
+        if (!isset($_POST[$key])) {
+            continue;
         }
+
+        $value = trim((string) $_POST[$key]);
+        if ($key === 'yandex_map') {
+            $value = \RuEdu\Engine\YandexMap::normalizeForStorage($value);
+        }
+
+        Setting::set($key, $value);
     }
 
     // Update config file for critical settings

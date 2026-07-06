@@ -26,6 +26,13 @@
     <?php include __DIR__ . '/partials/footer.php'; ?>
     <?php include __DIR__ . '/partials/a11y.php'; ?>
     <?php include __DIR__ . '/partials/cookie-banner.php'; ?>
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
     <script src="<?= $tpl->asset('assets/js/theme.js') ?>"></script>
+    <?php if (!empty($site_flash_success)): ?>
+    <script>document.addEventListener('DOMContentLoaded', function() { showToast(<?= json_encode($site_flash_success, JSON_UNESCAPED_UNICODE) ?>, 'success'); });</script>
+    <?php endif; ?>
+    <?php if (!empty($site_flash_error)): ?>
+    <script>document.addEventListener('DOMContentLoaded', function() { showToast(<?= json_encode($site_flash_error, JSON_UNESCAPED_UNICODE) ?>, 'error'); });</script>
+    <?php endif; ?>
 </body>
 </html>

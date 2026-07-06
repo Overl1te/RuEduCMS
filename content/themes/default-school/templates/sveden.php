@@ -11,17 +11,39 @@
     <?php foreach ($sectionList as $key => $label): ?>
         <section id="section-<?= $key ?>" class="mb-5">
             <h2><?= htmlspecialchars($label) ?></h2>
-            <?php if (!empty($sections[$key])): ?>
-                <table class="sveden-table">
-                    <?php foreach ($sections[$key] as $field => $value): ?>
-                        <?php if ($value): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($sectionFields[$key][$field] ?? $field) ?></td>
-                                <td><?= nl2br(htmlspecialchars($value)) ?></td>
-                            </tr>
+            <?php if ($key === 'common'): ?>
+                <div class="contacts-layout">
+                    <div class="contacts-info">
+                        <?php if (!empty($sections[$key])): ?>
+                            <table class="sveden-table">
+                                <?php foreach ($sections[$key] as $field => $value): ?>
+                                    <?php if ($value): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($sectionFields[$key][$field] ?? $field) ?></td>
+                                            <td><?= nl2br(htmlspecialchars($value)) ?></td>
+                                        </tr>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </table>
+                        <?php else: ?>
+                            <p class="text-muted">Информация не размещена.</p>
                         <?php endif; ?>
-                    <?php endforeach; ?>
-                </table>
+                    </div>
+                    <div class="contacts-map">
+                        <?php include __DIR__ . '/partials/yandex-map.php'; ?>
+                    </div>
+                </div>
+            <?php elseif (!empty($sections[$key])): ?>
+                    <table class="sveden-table">
+                        <?php foreach ($sections[$key] as $field => $value): ?>
+                            <?php if ($value): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($sectionFields[$key][$field] ?? $field) ?></td>
+                                    <td><?= nl2br(htmlspecialchars($value)) ?></td>
+                                </tr>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </table>
             <?php else: ?>
                 <p class="text-muted">Информация не размещена.</p>
             <?php endif; ?>

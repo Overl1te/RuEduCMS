@@ -74,7 +74,10 @@ class Template
      */
     private function defaultData(): array
     {
-        $data = [];
+        $data = [
+            'site_flash_success' => Session::flash('site_success'),
+            'site_flash_error' => Session::flash('site_error'),
+        ];
 
         if (!array_key_exists('side_menu', $this->data)) {
             try {

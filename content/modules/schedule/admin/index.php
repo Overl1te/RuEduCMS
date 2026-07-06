@@ -25,7 +25,10 @@
 </div>
 
 <?php if ($class): ?>
-    <div class="schedule-days-grid">
+    <div class="schedule-days-grid"
+         data-schedule-class="<?= htmlspecialchars($class) ?>"
+         data-schedule-reorder-url="<?= url('admin/schedule/reorder') ?>"
+         data-schedule-csrf="<?= htmlspecialchars($csrf_token) ?>">
         <?php foreach ($days as $dayNum => $dayName): ?>
             <?php
             $dayLessons = $schedule[$dayNum] ?? [];
@@ -49,6 +52,7 @@
                 <table class="table table-sm table-bordered schedule-day-table">
                     <thead>
                         <tr>
+                            <th style="width:28px"></th>
                             <th>Урок</th>
                             <th>Время</th>
                             <th>Предмет</th>
@@ -57,10 +61,13 @@
                             <th style="width:40px"></th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody data-schedule-day="<?= (int) $dayNum ?>">
                         <?php foreach ($dayLessons as $lesson): ?>
                             <?php $formId = 'lesson-form-' . (int) $lesson['id']; ?>
-                            <tr class="schedule-lesson-row">
+                            <tr class="schedule-lesson-row" data-lesson-id="<?= (int) $lesson['id'] ?>">
+                                <td class="schedule-drag-handle" draggable="true" title="Перетащить для изменения порядка">
+                                    <i class="bi bi-grip-vertical" aria-hidden="true"></i>
+                                </td>
                                 <td class="schedule-lesson-num"><?= (int) $lesson['lesson_number'] ?></td>
                                 <td>
                                     <input type="text"
@@ -116,7 +123,7 @@
                                     <i class="bi bi-plus"></i>
                                 </button>
                             </td>
-                            <td colspan="5"></td>
+                            <td colspan="6"></td>
                         </tr>
                     </tbody>
                 </table>

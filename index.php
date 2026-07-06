@@ -102,7 +102,7 @@ $router->get('/', function () use ($template) {
 });
 
 // Страницы
-$router->get('/page/{slug}', function (array $params) use ($template) {
+$router->get('/page/{slug}', function (array $params) use ($template, $render404) {
     $page = Page::getBySlug($params['slug']);
     if (!$page) {
         $render404();
@@ -134,7 +134,9 @@ $router->get('/news', function () use ($template) {
     ])->render('news-list');
 });
 
-$router->get('/news/{slug}', function (array $params) use ($template) {
+Hook::registerRoutes($router);
+
+$router->get('/news/{slug}', function (array $params) use ($template, $render404) {
     $article = Article::getBySlug($params['slug']);
     if (!$article) {
         $render404();
@@ -154,7 +156,5 @@ $router->get('/news/{slug}', function (array $params) use ($template) {
         'schema' => SEO::schemaNewsArticle($article),
     ])->render('news-detail');
 });
-
-Hook::registerRoutes($router);
 
 $router->dispatch(Router::getMethod(), Router::getUri());

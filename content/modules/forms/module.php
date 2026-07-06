@@ -11,19 +11,41 @@ use RuEdu\Model\Setting;
 
 Hook::on('register_routes', function ($router) {
     $router->post('/forms/submit/{slug}', function ($params) {
+        $isAjax = ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest';
+        $respond = function (bool $ok, string $message, int $status = 200) use ($isAjax): void {
+            if ($isAjax) {
+                http_response_code($status);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['ok' => $ok, 'message' => $message], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            Session::flash($ok ? 'site_success' : 'site_error', $message);
+            Router::redirect('contacts');
+        };
+
         $db = Database::getInstance();
         $form = $db->fetch("SELECT * FROM " . $db->table('forms') . " WHERE slug = ? AND status = 'active'", [$params['slug']]);
 
         if (!$form) {
+            if ($isAjax) {
+                $respond(false, 'Форма не найдена', 404);
+            }
             ErrorPage::send(404);
         }
 
+        if (empty($_POST['consent'])) {
+            $respond(false, 'Необходимо согласие на обработку персональных данных', 422);
+        }
+
         $submissionData = [];
-        $fields = json_decode($form['fields'], true) ?? [];
         foreach ($_POST as $key => $value) {
             if ($key !== 'consent') {
-                $submissionData[$key] = trim($value);
+                $submissionData[$key] = trim((string) $value);
             }
+        }
+
+        if ($submissionData === [] || in_array('', $submissionData, true)) {
+            $respond(false, 'Заполните все поля формы', 422);
         }
 
         $db->insert('form_submissions', [
@@ -33,7 +55,6 @@ Hook::on('register_routes', function ($router) {
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
-        // Email notification
         $emailTo = $form['email_to'] ?: Config::get('admin_email', '');
         if ($emailTo) {
             $subject = 'Новая заявка: ' . $form['name'];
@@ -44,8 +65,7 @@ Hook::on('register_routes', function ($router) {
             @mail($emailTo, $subject, $body, 'From: ' . $emailTo);
         }
 
-        Session::flash('success', 'Ваше сообщение отправлено!');
-        Router::redirect('contacts');
+        $respond(true, 'Ваше сообщение отправлено!');
     });
 });
 

@@ -63,7 +63,14 @@ $s = $settings;
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Код Яндекс.Карты (iframe)</label>
-                    <textarea name="yandex_map" class="form-control" rows="3"><?= htmlspecialchars($s['yandex_map'] ?? '') ?></textarea>
+                    <textarea name="yandex_map" class="form-control" rows="4" placeholder='<iframe src="https://yandex.ru/map-widget/v1/..." ...></iframe>'><?= htmlspecialchars($s['yandex_map'] ?? '') ?></textarea>
+                    <div class="form-text">
+                        Карта отображается на страницах
+                        <a href="<?= route('contacts') ?>" target="_blank">Контакты</a>,
+                        <a href="<?= route('sveden') ?>" target="_blank">Сведения об ОО</a> (раздел «Основные сведения»)
+                        и <a href="<?= route('page/informaciya') ?>" target="_blank">Информация</a>.
+                        Вставьте код <code>&lt;iframe&gt;</code> из конструктора Яндекс.Карт или прямую ссылку на карту.
+                    </div>
                 </div>
             </div></div>
         </div>

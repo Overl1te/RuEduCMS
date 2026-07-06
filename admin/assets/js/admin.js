@@ -286,12 +286,144 @@
         });
     }
 
+    function renumberScheduleDay(tbody) {
+        var num = 1;
+        tbody.querySelectorAll('.schedule-lesson-row').forEach(function (row) {
+            var numCell = row.querySelector('.schedule-lesson-num');
+            if (numCell) {
+                numCell.textContent = String(num);
+            }
+            var lessonId = row.getAttribute('data-lesson-id');
+            var form = lessonId ? document.getElementById('lesson-form-' + lessonId) : null;
+            if (form) {
+                var input = form.querySelector('input[name="lesson_number"]');
+                if (input) {
+                    input.value = String(num);
+                }
+            }
+            num += 1;
+        });
+
+        var addBtn = tbody.querySelector('.schedule-add-lesson');
+        if (addBtn) {
+            addBtn.setAttribute('data-lesson', String(num));
+        }
+    }
+
+    function saveScheduleOrder(tbody) {
+        var grid = tbody.closest('.schedule-days-grid');
+        if (!grid) {
+            return;
+        }
+
+        var reorderUrl = grid.getAttribute('data-schedule-reorder-url');
+        var className = grid.getAttribute('data-schedule-class');
+        var csrf = grid.getAttribute('data-schedule-csrf');
+        var day = tbody.getAttribute('data-schedule-day');
+        if (!reorderUrl || !className || !csrf || !day) {
+            return;
+        }
+
+        var order = [];
+        tbody.querySelectorAll('.schedule-lesson-row').forEach(function (row) {
+            var id = parseInt(row.getAttribute('data-lesson-id') || '', 10);
+            if (id > 0) {
+                order.push(id);
+            }
+        });
+        if (!order.length) {
+            return;
+        }
+
+        fetch(reorderUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: new URLSearchParams({
+                _csrf: csrf,
+                class_name: className,
+                day_of_week: day,
+                order: JSON.stringify(order)
+            })
+        }).catch(function () {
+            // ignore network errors; order is already updated in the UI
+        });
+    }
+
+    function initScheduleLessonDrag() {
+        document.querySelectorAll('.schedule-day-table tbody[data-schedule-day]').forEach(function (tbody) {
+            if (tbody.dataset.scheduleDragInit) {
+                return;
+            }
+            tbody.dataset.scheduleDragInit = '1';
+
+            var draggedRow = null;
+
+            tbody.querySelectorAll('.schedule-drag-handle').forEach(function (handle) {
+                handle.addEventListener('dragstart', function (event) {
+                    draggedRow = handle.closest('.schedule-lesson-row');
+                    if (!draggedRow) {
+                        return;
+                    }
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', draggedRow.getAttribute('data-lesson-id') || '');
+                    draggedRow.classList.add('schedule-lesson-row--dragging');
+                });
+            });
+
+            tbody.addEventListener('dragend', function () {
+                tbody.querySelectorAll('.schedule-lesson-row--dragging, .schedule-lesson-row--over').forEach(function (row) {
+                    row.classList.remove('schedule-lesson-row--dragging', 'schedule-lesson-row--over');
+                });
+                if (draggedRow) {
+                    renumberScheduleDay(tbody);
+                    saveScheduleOrder(tbody);
+                    draggedRow = null;
+                }
+            });
+
+            tbody.addEventListener('dragover', function (event) {
+                if (!draggedRow) {
+                    return;
+                }
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'move';
+
+                var row = event.target.closest('.schedule-lesson-row');
+                tbody.querySelectorAll('.schedule-lesson-row--over').forEach(function (item) {
+                    if (item !== row) {
+                        item.classList.remove('schedule-lesson-row--over');
+                    }
+                });
+                if (!row || row === draggedRow) {
+                    return;
+                }
+
+                row.classList.add('schedule-lesson-row--over');
+                var rect = row.getBoundingClientRect();
+                var after = event.clientY > rect.top + rect.height / 2;
+                if (after) {
+                    row.parentNode.insertBefore(draggedRow, row.nextSibling);
+                } else {
+                    row.parentNode.insertBefore(draggedRow, row);
+                }
+            });
+
+            tbody.addEventListener('drop', function (event) {
+                event.preventDefault();
+            });
+        });
+    }
+
     function initAdminEnhancements(root) {
         var scope = root || document;
         scope.querySelectorAll('[data-autocomplete]').forEach(initAutocomplete);
         scope.querySelectorAll('[data-phone-mask], input[name="phone"], input[name="contact_phone"]').forEach(initPhoneMask);
         scope.querySelectorAll('[data-time-mask]').forEach(initTimeRangeMask);
         initScheduleLessonFields();
+        initScheduleLessonDrag();
     }
 
     document.addEventListener('DOMContentLoaded', function () {
