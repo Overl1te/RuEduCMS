@@ -3,6 +3,46 @@
     "slug": "default-school",
     "version": "3.0.0",
     "author": "RuEduCMS",
-    "description": "Премиальная тема с анимациями, glassmorphism и полным охватом всех разделов CMS",
-    "screenshot": "assets/screenshot.png"
+    "description": "Стандартная универсальная школьная тема для образовательных учреждений: подходит для сайтов школ, лицеев и гимназий. Легко настраивается, содержит современные цвета, шрифты и удобную структуру страниц.",
+    "screenshot": "assets/screenshot.png",
+    "customizer": {
+        "sections": [
+            {
+                "id": "colors",
+                "title": "Цвета",
+                "fields": [
+                    { "key": "--primary", "label": "Основной", "type": "color", "default": "#1e40af" },
+                    { "key": "--primary-dark", "label": "Основной (тёмный)", "type": "color", "default": "#0f172a" },
+                    { "key": "--primary-light", "label": "Основной (светлый)", "type": "color", "default": "#3b82f6" },
+                    { "key": "--accent", "label": "Акцент", "type": "color", "default": "#f59e0b" },
+                    { "key": "--accent-light", "label": "Акцент (светлый)", "type": "color", "default": "#fbbf24" },
+                    { "key": "--teal", "label": "Бирюзовый", "type": "color", "default": "#14b8a6" },
+                    { "key": "--text", "label": "Текст", "type": "color", "default": "#0f172a" },
+                    { "key": "--text-light", "label": "Текст (светлый)", "type": "color", "default": "#475569" },
+                    { "key": "--bg", "label": "Фон", "type": "color", "default": "#ffffff" },
+                    { "key": "--bg-alt", "label": "Фон (альтернативный)", "type": "color", "default": "#f1f5f9" },
+                    { "key": "--border", "label": "Границы", "type": "color", "default": "#e2e8f0" }
+                ]
+            },
+            {
+                "id": "typography",
+                "title": "Шрифты",
+                "fields": [
+                    { "key": "--font-body", "label": "Основной шрифт", "type": "font", "stack": "sans", "default": "Manrope" },
+                    { "key": "--font-heading", "label": "Заголовки", "type": "font", "stack": "sans", "default": "Manrope" },
+                    { "key": "--font-display", "label": "Акцентный шрифт", "type": "font", "stack": "serif", "default": "Playfair Display" },
+                    { "key": "--font-size", "label": "Размер текста", "type": "range", "min": 14, "max": 20, "unit": "px", "default": "16px" }
+                ]
+            },
+            {
+                "id": "layout",
+                "title": "Форма",
+                "fields": [
+                    { "key": "--radius", "label": "Скругление", "type": "range", "min": 0, "max": 32, "unit": "px", "default": "16px" },
+                    { "key": "--radius-sm", "label": "Скругление (мелкое)", "type": "range", "min": 0, "max": 24, "unit": "px", "default": "10px" },
+                    { "key": "--radius-lg", "label": "Скругление (крупное)", "type": "range", "min": 0, "max": 48, "unit": "px", "default": "24px" }
+                ]
+            }
+        ]
+    }
 }

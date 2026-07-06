@@ -49,7 +49,7 @@ $s = $settings;
                             <option value="<?= $t['slug'] ?>" <?= Config::get('theme') === $t['slug'] ? 'selected' : '' ?>><?= htmlspecialchars($t['name'] ?? $t['slug']) ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <div class="form-text"><a href="<?= url('admin/themes') ?>">Редактировать файлы темы</a></div>
+                    <div class="form-text"><a href="<?= url('admin/themes') ?>">Управление темами</a> — установка и активация</div>
                 </div>
             </div></div>
             <div class="card mb-3"><div class="card-header">Контакты</div><div class="card-body">

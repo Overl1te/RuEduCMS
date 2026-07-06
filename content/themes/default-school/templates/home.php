@@ -1,4 +1,11 @@
-<?php ob_start(); ?>
+<?php ob_start();
+$blockHtml = \RuEdu\Engine\BlockRenderer::renderHome([
+    'site_name' => $site_name ?? null,
+    'articles' => $articles ?? [],
+]);
+if ($blockHtml !== ''): ?>
+    <?= $blockHtml ?>
+<?php else: ?>
 <section class="hero">
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="hero-orb hero-orb--1" aria-hidden="true" data-parallax="0.15"></div>
@@ -131,5 +138,6 @@
         </div>
     </div>
 </section>
-<?php $content = ob_get_clean();
+<?php endif;
+$content = ob_get_clean();
 include __DIR__ . '/layout.php';

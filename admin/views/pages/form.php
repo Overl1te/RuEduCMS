@@ -15,6 +15,20 @@
                 <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($page['slug'] ?? '') ?>" placeholder="Авто из заголовка">
             </div>
             <div class="mb-3">
+                <label class="form-label">Режим содержимого</label>
+                <select name="content_mode" class="form-select" id="contentMode">
+                    <option value="html" <?= ($page['content_mode'] ?? 'html') === 'html' ? 'selected' : '' ?>>HTML (редактор)</option>
+                    <option value="blocks" <?= ($page['content_mode'] ?? '') === 'blocks' ? 'selected' : '' ?>>Блоки (конструктор)</option>
+                </select>
+            </div>
+            <?php if ($page && ($page['content_mode'] ?? 'html') === 'blocks'): ?>
+            <div class="mb-3">
+                <a href="<?= url('admin/pages/builder/' . (int) $page['id']) ?>" class="btn btn-outline-primary">
+                    <i class="bi bi-layout-wtf"></i> Открыть конструктор
+                </a>
+            </div>
+            <?php endif; ?>
+            <div class="mb-3" id="htmlEditorWrap">
                 <label class="form-label">Содержимое</label>
                 <textarea name="content" id="editor" class="form-control" rows="15"><?= htmlspecialchars($page['content'] ?? '') ?></textarea>
             </div>
@@ -38,4 +52,27 @@
     </div>
 </form>
 <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-<script>tinymce.init({selector:'#editor',height:400,language:'ru',plugins:'link image lists table code',toolbar:'undo redo | bold italic | link image | bullist numlist | table | code'});</script>
+<script>
+(function () {
+    var mode = document.getElementById('contentMode');
+    var wrap = document.getElementById('htmlEditorWrap');
+    var editorInit = false;
+
+    function toggleEditor() {
+        if (!wrap || !mode) return;
+        var isHtml = mode.value === 'html';
+        wrap.style.display = isHtml ? '' : 'none';
+        if (isHtml && !editorInit && window.tinymce) {
+            tinymce.init({selector:'#editor',height:400,language:'ru',plugins:'link image lists table code',toolbar:'undo redo | bold italic | link image | bullist numlist | table | code'});
+            editorInit = true;
+        }
+    }
+
+    if (mode) {
+        mode.addEventListener('change', toggleEditor);
+        toggleEditor();
+    } else if (window.tinymce) {
+        tinymce.init({selector:'#editor',height:400,language:'ru',plugins:'link image lists table code',toolbar:'undo redo | bold italic | link image | bullist numlist | table | code'});
+    }
+})();
+</script>

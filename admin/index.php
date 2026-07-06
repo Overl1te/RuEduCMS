@@ -16,8 +16,13 @@ use RuEdu\Engine\Updater;
 use RuEdu\Engine\Migrate;
 use RuEdu\Engine\Version;
 use RuEdu\Engine\ThemeEditor;
+use RuEdu\Engine\ThemeManager;
+use RuEdu\Engine\ThemeInstaller;
+use RuEdu\Engine\BlockRegistry;
+use RuEdu\Engine\BlockRenderer;
 use RuEdu\Engine\SetupRecommendations;
 use RuEdu\Engine\SiteSetup;
+use RuEdu\Engine\HelpDocs;
 use RuEdu\Engine\SystemPages;
 use RuEdu\Engine\SearchIndexer;
 use RuEdu\Model\Page;
@@ -248,6 +253,30 @@ $router->get('', function () use ($admin) {
     Router::redirect('admin/');
 });
 
+// Help
+$renderHelp = function (string $slug) use ($admin): void {
+    Auth::requireAuth();
+
+    if (!HelpDocs::sectionExists($slug)) {
+        Router::redirect('admin/help/' . HelpDocs::DEFAULT_SLUG);
+    }
+
+    $section = HelpDocs::getSection($slug);
+    $groupedSections = HelpDocs::getGroupedSections();
+    $groups = HelpDocs::getGroups();
+    $content = HelpDocs::renderSection($slug);
+
+    $admin->render('help/index', compact('section', 'slug', 'groupedSections', 'groups', 'content'));
+};
+
+$router->get('/help', function () use ($renderHelp): void {
+    $renderHelp(HelpDocs::DEFAULT_SLUG);
+});
+
+$router->get('/help/{slug}', function (array $p) use ($renderHelp): void {
+    $renderHelp($p['slug']);
+});
+
 // Pages CRUD
 $router->get('/pages', function () use ($admin) {
     Auth::requireAuth();
@@ -283,6 +312,10 @@ $router->post('/pages/save', function () {
         'author_id' => Auth::id(),
     ];
 
+    if (isset($_POST['content_mode']) && in_array($_POST['content_mode'], ['html', 'blocks'], true)) {
+        $data['content_mode'] = $_POST['content_mode'];
+    }
+
     if (!Auth::canPublish() && $data['status'] === 'published') {
         $data['status'] = 'draft';
     }
@@ -301,6 +334,94 @@ $router->post('/pages/save', function () {
     Cache::flush();
     Session::flash('success', 'Страница сохранена');
     Router::redirect('admin/pages');
+});
+
+$router->get('/pages/builder/{id}', function (array $p) use ($admin) {
+    Auth::requireEditor();
+    $page = Page::getById((int) ($p['id'] ?? 0));
+    if (!$page) {
+        Router::redirect('admin/pages');
+    }
+
+    $blocks = [];
+    if (!empty($page['content_blocks'])) {
+        $decoded = json_decode((string) $page['content_blocks'], true);
+        $blocks = is_array($decoded) ? BlockRenderer::normalizeBlocks($decoded) : [];
+    }
+
+    $builderType = 'page';
+    $title = 'Конструктор: ' . ($page['title'] ?? '');
+    $saveUrl = url('admin/pages/builder/save');
+    $backUrl = url('admin/pages/edit/' . (int) $page['id']);
+    $blockTypes = BlockRegistry::forContext('page');
+    foreach (BlockRegistry::forContext('all') as $type => $meta) {
+        $blockTypes[$type] = $meta;
+    }
+
+    $admin->render('pages/builder', compact('builderType', 'title', 'saveUrl', 'backUrl', 'blocks', 'blockTypes', 'page'));
+});
+
+$router->post('/pages/builder/save', function () {
+    Auth::requireEditor();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/pages');
+    }
+
+    $id = (int) ($_POST['id'] ?? 0);
+    $page = Page::getById($id);
+    if (!$page) {
+        Router::redirect('admin/pages');
+    }
+
+    $raw = $_POST['blocks'] ?? '[]';
+    $decoded = json_decode(is_string($raw) ? $raw : '[]', true);
+    $blocks = BlockRenderer::normalizeBlocks(is_array($decoded) ? $decoded : []);
+
+    Page::update($id, [
+        'content_mode' => 'blocks',
+        'content_blocks' => json_encode($blocks, JSON_UNESCAPED_UNICODE),
+    ]);
+
+    Cache::flush();
+    Session::flash('success', 'Структура страницы сохранена');
+    Router::redirect('admin/pages/builder/' . $id);
+});
+
+$router->get('/home/builder', function () use ($admin) {
+    Auth::requireEditor();
+
+    $blocks = BlockRenderer::getHomeLayout();
+    if ($blocks === []) {
+        $blocks = BlockRenderer::defaultHomeLayout();
+    }
+
+    $builderType = 'home';
+    $title = 'Конструктор главной страницы';
+    $saveUrl = url('admin/home/builder/save');
+    $backUrl = url('admin/pages');
+    $blockTypes = BlockRegistry::forContext('home');
+    foreach (BlockRegistry::forContext('all') as $type => $meta) {
+        $blockTypes[$type] = $meta;
+    }
+    $page = null;
+
+    $admin->render('pages/builder', compact('builderType', 'title', 'saveUrl', 'backUrl', 'blocks', 'blockTypes', 'page'));
+});
+
+$router->post('/home/builder/save', function () {
+    Auth::requireEditor();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/home/builder');
+    }
+
+    $raw = $_POST['blocks'] ?? '[]';
+    $decoded = json_decode(is_string($raw) ? $raw : '[]', true);
+    $blocks = BlockRenderer::normalizeBlocks(is_array($decoded) ? $decoded : []);
+
+    BlockRenderer::saveHomeLayout($blocks);
+
+    Session::flash('success', 'Главная страница сохранена');
+    Router::redirect('admin/home/builder');
 });
 
 $router->post('/pages/delete/{id}', function (array $p) {
@@ -625,7 +746,65 @@ $router->post('/updates/backup', function () {
 $router->get('/themes', function () use ($admin) {
     Auth::requireAdmin();
     $themes = \RuEdu\Engine\Template::getThemes();
-    $admin->render('themes/index', compact('themes'));
+    $activeSlug = ThemeManager::getActiveSlug();
+    $hasZip = class_exists('ZipArchive');
+    $admin->render('themes/index', compact('themes', 'activeSlug', 'hasZip'));
+});
+
+$router->post('/themes/activate', function () {
+    Auth::requireAdmin();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/themes');
+    }
+
+    $slug = trim($_POST['slug'] ?? '');
+    $result = ThemeManager::activate($slug);
+    if ($result === true) {
+        Session::flash('success', 'Тема активирована');
+    } else {
+        Session::flash('error', $result);
+    }
+    Router::redirect('admin/themes');
+});
+
+$router->post('/themes/install', function () {
+    Auth::requireAdmin();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Session::flash('error', 'Сессия истекла. Обновите страницу и повторите загрузку.');
+        Router::redirect('admin/themes');
+    }
+
+    if (empty($_FILES['theme_zip'])) {
+        Session::flash('error', 'Файл темы не получен. Проверьте лимиты upload_max_filesize и post_max_size в PHP.');
+        Router::redirect('admin/themes');
+    }
+
+    $uploadError = (int) ($_FILES['theme_zip']['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($uploadError !== UPLOAD_ERR_OK) {
+        $message = match ($uploadError) {
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Файл слишком большой. Увеличьте upload_max_filesize и post_max_size в PHP.',
+            UPLOAD_ERR_PARTIAL => 'Файл загружен частично. Повторите попытку.',
+            UPLOAD_ERR_NO_FILE => 'Файл не выбран.',
+            default => 'Не удалось загрузить архив темы (код ' . $uploadError . ').',
+        };
+        Session::flash('error', $message);
+        Router::redirect('admin/themes');
+    }
+
+    $tmpPath = STORAGE_PATH . '/theme_upload_' . uniqid() . '.zip';
+    if (!move_uploaded_file($_FILES['theme_zip']['tmp_name'], $tmpPath)) {
+        Session::flash('error', 'Ошибка сохранения архива. Проверьте права на запись в storage/.');
+        Router::redirect('admin/themes');
+    }
+
+    $result = ThemeInstaller::install($tmpPath);
+    if ($result['ok']) {
+        $name = $result['name'] ?? $result['slug'] ?? 'тема';
+        Session::flash('success', 'Тема «' . $name . '» установлена');
+    } else {
+        Session::flash('error', $result['error'] ?? 'Ошибка установки темы');
+    }
+    Router::redirect('admin/themes');
 });
 
 $router->get('/themes/edit/{slug}', function (array $p) use ($admin) {
@@ -688,6 +867,74 @@ $router->post('/themes/save', function () {
     Router::redirect('admin/themes/edit/' . rawurlencode($slug) . '?file=' . rawurlencode($file));
 });
 
+$router->get('/themes/customize/{slug}', function (array $p) use ($admin) {
+    Auth::requireAdmin();
+
+    $slug = $p['slug'] ?? '';
+    if (ThemeEditor::getThemeRoot($slug) === null) {
+        Session::flash('error', 'Тема не найдена');
+        Router::redirect('admin/themes');
+    }
+
+    $themes = \RuEdu\Engine\Template::getThemes();
+    $theme = null;
+    foreach ($themes as $t) {
+        if (($t['slug'] ?? '') === $slug) {
+            $theme = $t;
+            break;
+        }
+    }
+    $theme ??= ['slug' => $slug, 'name' => $slug];
+
+    $schema = \RuEdu\Engine\ThemeCustomizer::getSchema($slug);
+    if (empty($schema['sections'])) {
+        Session::flash('error', 'Тема не поддерживает визуальный редактор оформления');
+        Router::redirect('admin/themes');
+    }
+
+    $admin->render('themes/customize', compact('slug', 'theme'));
+});
+
+$router->post('/themes/customize/save', function () {
+    Auth::requireAdmin();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/themes');
+    }
+
+    $slug = trim($_POST['slug'] ?? '');
+    if (ThemeEditor::getThemeRoot($slug) === null) {
+        Session::flash('error', 'Тема не найдена');
+        Router::redirect('admin/themes');
+    }
+
+    unset($_POST['_csrf'], $_POST['slug']);
+    $result = \RuEdu\Engine\ThemeCustomizer::save($slug, $_POST);
+    if ($result !== true) {
+        Session::flash('error', $result);
+        Router::redirect('admin/themes/customize/' . rawurlencode($slug));
+    }
+
+    Session::flash('success', 'Настройки оформления сохранены');
+    Router::redirect('admin/themes/customize/' . rawurlencode($slug));
+});
+
+$router->post('/themes/customize/reset', function () {
+    Auth::requireAdmin();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/themes');
+    }
+
+    $slug = trim($_POST['slug'] ?? '');
+    if (ThemeEditor::getThemeRoot($slug) === null) {
+        Session::flash('error', 'Тема не найдена');
+        Router::redirect('admin/themes');
+    }
+
+    \RuEdu\Engine\ThemeCustomizer::reset($slug);
+    Session::flash('success', 'Настройки оформления сброшены');
+    Router::redirect('admin/themes/customize/' . rawurlencode($slug));
+});
+
 // Settings
 $router->get('/settings', function () use ($admin) {
     Auth::requireAdmin();
@@ -711,6 +958,14 @@ $router->post('/settings/save', function () {
 
     $keys = ['site_name', 'site_description', 'site_url', 'admin_email', 'contact_phone',
              'contact_address', 'theme', 'cache_enabled', 'fz152_text', 'cookie_text', 'yandex_map'];
+
+    if (isset($_POST['theme'])) {
+        $themeSlug = trim((string) $_POST['theme']);
+        if (!ThemeManager::themeExists($themeSlug)) {
+            Session::flash('error', 'Выбранная тема не найдена');
+            Router::redirect('admin/settings');
+        }
+    }
 
     foreach ($keys as $key) {
         if (!isset($_POST[$key])) {

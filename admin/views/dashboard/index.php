@@ -74,6 +74,7 @@
             <a href="<?= url('admin/articles/create') ?>" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus"></i> Новость</a>
             <a href="<?= url('admin/media') ?>" class="btn btn-outline-primary btn-sm"><i class="bi bi-upload"></i> Медиа</a>
             <a href="<?= url('admin/settings') ?>" class="btn btn-outline-secondary btn-sm"><i class="bi bi-gear"></i> Настройки</a>
+            <a href="<?= url('admin/help') ?>" class="btn btn-outline-secondary btn-sm"><i class="bi bi-question-circle"></i> Справка</a>
         </div>
     </div>
 </div>
