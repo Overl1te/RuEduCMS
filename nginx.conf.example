@@ -1,0 +1,20 @@
+# RuEduCMS на nginx — стандартная конфигурация PHP-сайта.
+# На большинстве хостингов она уже включена, ничего настраивать не нужно.
+# Для своего VPS — укажите root и fastcgi_pass:
+
+server {
+    listen 80;
+    server_name example.com;
+    root /var/www/rueducms;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$is_args$args;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+    }
+}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/core/bootstrap.php';
 
+use RuEdu\Engine\FrontController;
 use RuEdu\Engine\Auth;
 use RuEdu\Engine\Config;
 use RuEdu\Engine\ErrorPage;
@@ -16,6 +17,10 @@ use RuEdu\Engine\Migrate;
 use RuEdu\Model\Page;
 use RuEdu\Model\Article;
 use RuEdu\Model\Menu;
+
+if (FrontController::handle()) {
+    exit;
+}
 
 if (!Config::isInstalled()) {
     if (is_dir(ROOT_PATH . '/install')) {

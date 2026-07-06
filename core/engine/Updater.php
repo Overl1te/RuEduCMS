@@ -260,33 +260,20 @@ class Updater
         return null;
     }
 
+    /**
+     * Обновляет папку пофайлово, без rename() всей директории.
+     * Так можно обновлять admin/ и core/, пока CMS уже запущена (Windows, php-fpm).
+     */
     private static function replaceDirectory(string $source, string $target): void
     {
         if (!is_dir($source)) {
             throw new \RuntimeException('Папка не найдена: ' . basename($source));
         }
 
-        $backup = $target . '_bak_' . time();
-        if (is_dir($target)) {
-            if (!rename($target, $backup)) {
-                throw new \RuntimeException('Не удалось сохранить текущую папку ' . basename($target));
-            }
-        }
-
-        try {
-            self::copyDirectory($source, $target);
-            if (is_dir($backup)) {
-                ruedu_delete_directory($backup);
-            }
-        } catch (\Throwable $e) {
-            if (is_dir($backup) && !is_dir($target)) {
-                rename($backup, $target);
-            }
-            throw $e;
-        }
+        self::syncDirectory($source, $target);
     }
 
-    private static function copyDirectory(string $source, string $target): void
+    private static function syncDirectory(string $source, string $target): void
     {
         if (!is_dir($target) && !mkdir($target, 0755, true) && !is_dir($target)) {
             throw new \RuntimeException('Не удалось создать папку: ' . basename($target));
@@ -299,10 +286,30 @@ class Updater
             $from = $source . '/' . $item;
             $to = $target . '/' . $item;
             if (is_dir($from)) {
-                self::copyDirectory($from, $to);
+                if (is_file($to)) {
+                    unlink($to);
+                }
+                self::syncDirectory($from, $to);
             } else {
+                if (is_dir($to)) {
+                    ruedu_delete_directory($to);
+                }
                 if (!copy($from, $to)) {
                     throw new \RuntimeException('Не удалось скопировать файл: ' . $item);
+                }
+            }
+        }
+
+        foreach (scandir($target) as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            if (!file_exists($source . '/' . $item)) {
+                $path = $target . '/' . $item;
+                if (is_dir($path)) {
+                    ruedu_delete_directory($path);
+                } else {
+                    @unlink($path);
                 }
             }
         }
