@@ -32,3 +32,63 @@
 table td { vertical-align: middle; }
 .theme-file-list { max-height: 70vh; overflow-y: auto; }
 .theme-editor .CodeMirror { font-size: 13px; border-radius: 0 0 0.375rem 0.375rem; }
+
+.schedule-class-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 2rem;
+}
+.schedule-class-cell {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--bs-body-color);
+    background: var(--bs-body-bg);
+    transition: background .15s, border-color .15s, color .15s;
+}
+.schedule-class-cell:hover {
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+}
+.schedule-class-cell--active {
+    background: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: #fff;
+}
+.schedule-class-cell--active:hover {
+    color: #fff;
+    background: var(--bs-primary);
+}
+.schedule-class-cell--add {
+    cursor: pointer;
+    color: var(--bs-secondary);
+}
+.schedule-class-cell--add:hover {
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+    background: var(--bs-body-bg);
+}
+.schedule-day-title {
+    margin: 1.5rem 0 .75rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+.schedule-day-title:first-of-type {
+    margin-top: 0;
+}
+.schedule-add-row td {
+    border: none;
+    background: transparent;
+}
+.schedule-day-table {
+    margin-bottom: 0;
+}
