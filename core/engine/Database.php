@@ -75,10 +75,15 @@ class Database
         return $this->query($sql, $params)->fetchAll();
     }
 
+    private function quoteColumn(string $column): string
+    {
+        return '`' . str_replace('`', '``', $column) . '`';
+    }
+
     public function insert(string $table, array $data): int
     {
         $table = $this->table($table);
-        $columns = implode(', ', array_keys($data));
+        $columns = implode(', ', array_map(fn($k) => $this->quoteColumn($k), array_keys($data)));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
         $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
         $this->query($sql, array_values($data));
@@ -88,7 +93,7 @@ class Database
     public function update(string $table, array $data, string $where, array $whereParams = []): int
     {
         $table = $this->table($table);
-        $sets = implode(', ', array_map(fn($k) => "{$k} = ?", array_keys($data)));
+        $sets = implode(', ', array_map(fn($k) => $this->quoteColumn($k) . ' = ?', array_keys($data)));
         $sql = "UPDATE {$table} SET {$sets} WHERE {$where}";
         $stmt = $this->query($sql, array_merge(array_values($data), $whereParams));
         return $stmt->rowCount();
