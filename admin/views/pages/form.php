@@ -18,10 +18,11 @@
                 <label class="form-label">Режим содержимого</label>
                 <select name="content_mode" class="form-select" id="contentMode">
                     <option value="html" <?= ($page['content_mode'] ?? 'html') === 'html' ? 'selected' : '' ?>>HTML (редактор)</option>
-                    <option value="blocks" <?= ($page['content_mode'] ?? '') === 'blocks' ? 'selected' : '' ?>>Блоки (конструктор)</option>
+                    <option value="fields" <?= ($page['content_mode'] ?? '') === 'fields' ? 'selected' : '' ?>>Поля (конструктор)</option>
+                    <option value="blocks" <?= ($page['content_mode'] ?? '') === 'blocks' ? 'selected' : '' ?>>Блоки (legacy)</option>
                 </select>
             </div>
-            <?php if ($page && ($page['content_mode'] ?? 'html') === 'blocks'): ?>
+            <?php if ($page && in_array($page['content_mode'] ?? '', ['blocks', 'fields'], true)): ?>
             <div class="mb-3">
                 <a href="<?= url('admin/pages/builder/' . (int) $page['id']) ?>" class="btn btn-outline-primary">
                     <i class="bi bi-layout-wtf"></i> Открыть конструктор

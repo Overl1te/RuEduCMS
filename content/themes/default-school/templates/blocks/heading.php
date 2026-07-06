@@ -6,10 +6,10 @@
             <span class="section-eyebrow"><?= htmlspecialchars((string) $props['eyebrow']) ?></span>
             <?php endif; ?>
             <?php if (!empty($props['title'])): ?>
-            <h2 class="section-title"><?= htmlspecialchars((string) $props['title']) ?></h2>
+            <h2 class="section-title" data-fg-element="title"><?= htmlspecialchars((string) $props['title']) ?></h2>
             <?php endif; ?>
             <?php if (!empty($props['subtitle'])): ?>
-            <p class="section-subtitle"><?= htmlspecialchars((string) $props['subtitle']) ?></p>
+            <p class="section-subtitle" data-fg-element="subtitle"><?= htmlspecialchars((string) $props['subtitle']) ?></p>
             <?php endif; ?>
         </div>
     </div>

@@ -1,5 +1,9 @@
 <?php ob_start();
-$blockHtml = \RuEdu\Engine\BlockRenderer::renderHome([
+$fieldHtml = \RuEdu\Engine\FieldRenderer::renderEntity('home', [
+    'site_name' => $site_name ?? null,
+    'articles' => $articles ?? [],
+]);
+$blockHtml = $fieldHtml !== '' ? $fieldHtml : \RuEdu\Engine\BlockRenderer::renderHome([
     'site_name' => $site_name ?? null,
     'articles' => $articles ?? [],
 ]);

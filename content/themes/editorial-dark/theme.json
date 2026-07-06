@@ -1,0 +1,47 @@
+{
+    "name": "Тёмная редакционная",
+    "slug": "editorial-dark",
+    "version": "1.0.0",
+    "author": "RuEduCMS",
+    "description": "Альтернативная тёмная тема в стиле редакционного журнала: контрастная типографика, плоская вёрстка без анимаций, полная ширина контента.",
+    "customizer": {
+        "sections": [
+            {
+                "id": "colors",
+                "title": "Цвета",
+                "fields": [
+                    { "key": "--primary", "label": "Основной", "type": "color", "default": "#c8f542" },
+                    { "key": "--primary-dark", "label": "Основной (тёмный)", "type": "color", "default": "#9bc42a" },
+                    { "key": "--primary-light", "label": "Основной (светлый)", "type": "color", "default": "#d4f76a" },
+                    { "key": "--accent", "label": "Акцент", "type": "color", "default": "#f5f0e8" },
+                    { "key": "--accent-light", "label": "Акцент (светлый)", "type": "color", "default": "#ffffff" },
+                    { "key": "--teal", "label": "Дополнительный", "type": "color", "default": "#6b7280" },
+                    { "key": "--text", "label": "Текст", "type": "color", "default": "#f5f0e8" },
+                    { "key": "--text-light", "label": "Текст (светлый)", "type": "color", "default": "#a8a29e" },
+                    { "key": "--bg", "label": "Фон", "type": "color", "default": "#0c0c0c" },
+                    { "key": "--bg-alt", "label": "Фон (альтернативный)", "type": "color", "default": "#141414" },
+                    { "key": "--border", "label": "Границы", "type": "color", "default": "#2a2a2a" }
+                ]
+            },
+            {
+                "id": "typography",
+                "title": "Шрифты",
+                "fields": [
+                    { "key": "--font-body", "label": "Основной шрифт", "type": "font", "stack": "sans", "default": "Source Sans 3" },
+                    { "key": "--font-heading", "label": "Заголовки", "type": "font", "stack": "serif", "default": "PT Serif" },
+                    { "key": "--font-display", "label": "Акцентный шрифт", "type": "font", "stack": "serif", "default": "PT Serif" },
+                    { "key": "--font-size", "label": "Размер текста", "type": "range", "min": 14, "max": 20, "unit": "px", "default": "16px" }
+                ]
+            },
+            {
+                "id": "layout",
+                "title": "Форма",
+                "fields": [
+                    { "key": "--radius", "label": "Скругление", "type": "range", "min": 0, "max": 32, "unit": "px", "default": "0px" },
+                    { "key": "--radius-sm", "label": "Скругление (мелкое)", "type": "range", "min": 0, "max": 24, "unit": "px", "default": "0px" },
+                    { "key": "--radius-lg", "label": "Скругление (крупное)", "type": "range", "min": 0, "max": 48, "unit": "px", "default": "0px" }
+                ]
+            }
+        ]
+    }
+}

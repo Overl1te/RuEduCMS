@@ -44,6 +44,10 @@ $title = 'Страницы';
                     <a href="<?= url('admin/home/builder') ?>" class="btn btn-sm btn-outline-primary" title="Конструктор главной">
                         <i class="bi bi-layout-wtf"></i>
                     </a>
+                <?php elseif (empty($p['content_url'])): ?>
+                    <a href="<?= url('admin/pages/structure/' . rawurlencode((string) $p['id'])) ?>" class="btn btn-sm btn-outline-primary" title="Структура">
+                        <i class="bi bi-layout-wtf"></i>
+                    </a>
                 <?php endif; ?>
                 <?php if (Auth::isAdmin()): ?>
                     <a href="<?= url('admin/themes/edit/' . rawurlencode($activeTheme) . '?file=' . rawurlencode($p['template'])) ?>"
@@ -93,7 +97,7 @@ $title = 'Страницы';
                     <i class="bi bi-box-arrow-up-right"></i>
                 </a>
                 <a href="<?= url('admin/pages/edit/' . $p['id']) ?>" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                <?php if (($p['content_mode'] ?? 'html') === 'blocks'): ?>
+                <?php if (in_array($p['content_mode'] ?? '', ['blocks', 'fields'], true)): ?>
                 <a href="<?= url('admin/pages/builder/' . $p['id']) ?>" class="btn btn-sm btn-outline-primary" title="Конструктор"><i class="bi bi-layout-wtf"></i></a>
                 <?php endif; ?>
                 <form method="POST" action="<?= url('admin/pages/delete/' . $p['id']) ?>" class="d-inline" onsubmit="return confirm('Удалить?')">

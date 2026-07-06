@@ -1,249 +1,204 @@
 (function () {
     'use strict';
 
-    var config = window.pageBuilderConfig || { blocks: [], blockTypes: {} };
-    var blocks = JSON.parse(JSON.stringify(config.blocks || []));
-    var blockTypes = config.blockTypes || {};
-    var selectedIndex = -1;
-    var sortableInstance = null;
+    var cfg = window.pageBuilderConfig || {};
+    var rows = JSON.parse(JSON.stringify(cfg.rows || []));
+    var layouts = cfg.layouts || {};
+    var selected = -1;
+    var sortable = null;
 
-    var canvas = document.getElementById('blockCanvas');
-    var propsPanel = document.getElementById('blockPropsPanel');
-    var blocksInput = document.getElementById('blocksInput');
-    var blockCount = document.getElementById('blockCount');
+    var canvas = document.getElementById('rowCanvas');
+    var fieldPanel = document.getElementById('fieldEditorPanel');
+    var blockStylePanel = document.getElementById('blockStylePanel');
+    var elementStylePanel = document.getElementById('elementStylePanel');
+    var fieldDataInput = document.getElementById('fieldDataInput');
+    var rowCount = document.getElementById('rowCount');
+    var previewFrame = document.getElementById('builderPreview');
 
-    if (!canvas || !propsPanel || !blocksInput) {
-        return;
+    if (!canvas || !fieldDataInput) return;
+
+    function sync() {
+        fieldDataInput.value = JSON.stringify(rows);
+        if (rowCount) rowCount.textContent = rows.length + ' блок(ов)';
+        debouncedPreview();
     }
 
-    function syncInput() {
-        blocksInput.value = JSON.stringify(blocks.map(function (b) {
-            return { type: b.type, props: b.props || {} };
-        }));
-        if (blockCount) {
-            blockCount.textContent = blocks.length + ' блок(ов)';
-        }
+    var previewTimer;
+    function debouncedPreview() {
+        clearTimeout(previewTimer);
+        previewTimer = setTimeout(refreshPreview, 600);
     }
 
-    function blockLabel(type) {
-        return (blockTypes[type] && blockTypes[type].label) || type;
-    }
-
-    function blockIcon(type) {
-        return (blockTypes[type] && blockTypes[type].icon) || 'bi-square';
-    }
-
-    function blockPreview(props) {
-        var keys = ['title', 'subtitle', 'badge', 'text', 'content'];
-        for (var i = 0; i < keys.length; i++) {
-            var val = props[keys[i]];
-            if (val && typeof val === 'string') {
-                return val.replace(/<[^>]+>/g, '').slice(0, 80);
-            }
-        }
-        return '';
-    }
-
-    function defaultProps(type) {
-        var meta = blockTypes[type];
-        return meta && meta.defaults ? JSON.parse(JSON.stringify(meta.defaults)) : {};
-    }
-
-    function escapeHtml(str) {
-        var div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
-
-    function initSortable() {
-        if (sortableInstance) {
-            sortableInstance.destroy();
-            sortableInstance = null;
-        }
-        if (typeof Sortable === 'undefined' || blocks.length === 0) {
-            return;
-        }
-        sortableInstance = new Sortable(canvas, {
-            animation: 150,
-            handle: '.block-card__handle',
-            draggable: '.block-card',
-            onEnd: function (evt) {
-                if (evt.oldIndex === evt.newIndex) {
-                    return;
+    function refreshPreview() {
+        if (!cfg.apiPreview) return;
+        fetch(cfg.apiPreview, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ entity: cfg.entity, field_data: rows })
+        }).then(function (r) { return r.json(); }).then(function (res) {
+            if (!previewFrame) return;
+            try {
+                var doc = previewFrame.contentDocument;
+                var mount = doc.getElementById('fg-preview-mount');
+                if (!mount) {
+                    mount = doc.createElement('div');
+                    mount.id = 'fg-preview-mount';
+                    var main = doc.querySelector('.main-content') || doc.body;
+                    if (main) main.prepend(mount);
                 }
-                var moved = blocks.splice(evt.oldIndex, 1)[0];
-                blocks.splice(evt.newIndex, 0, moved);
-                selectedIndex = evt.newIndex;
-                syncInput();
-                updateSelection();
-            }
-        });
+                if (mount) mount.innerHTML = res.html || '';
+            } catch (e) { /* cross-origin fallback */ }
+        }).catch(function () {});
     }
 
-    function updateSelection() {
-        canvas.querySelectorAll('.block-card').forEach(function (card) {
-            var idx = parseInt(card.dataset.index, 10);
-            card.classList.toggle('is-selected', idx === selectedIndex);
-        });
+    document.getElementById('refreshPreview').addEventListener('click', function () {
+        if (previewFrame) previewFrame.src = previewFrame.src;
+        refreshPreview();
+    });
+
+    function newRow(layout) {
+        var meta = layouts[layout];
+        return {
+            id: 'blk_' + Date.now().toString(36),
+            layout: layout,
+            data: meta ? window.RuEduFieldEditor.layoutDefaults(meta) : {},
+            style: {},
+            elementStyles: {}
+        };
     }
 
     function renderCanvas() {
         canvas.innerHTML = '';
-
-        if (blocks.length === 0) {
-            var empty = document.createElement('div');
-            empty.className = 'block-canvas__empty text-muted text-center py-5';
-            empty.textContent = 'Добавьте блок из палитры слева';
-            canvas.appendChild(empty);
-            propsPanel.innerHTML = '<p class="text-muted small mb-0">Выберите блок на холсте</p>';
-            selectedIndex = -1;
-            syncInput();
-            initSortable();
-            return;
+        if (rows.length === 0) {
+            canvas.innerHTML = '<div class="text-muted text-center py-3">Добавьте layout</div>';
         }
-
-        blocks.forEach(function (block, index) {
+        rows.forEach(function (row, idx) {
+            var meta = layouts[row.layout] || {};
             var card = document.createElement('div');
-            card.className = 'block-card' + (index === selectedIndex ? ' is-selected' : '');
-            card.dataset.index = String(index);
+            card.className = 'block-card' + (idx === selected ? ' is-selected' : '');
             card.innerHTML =
                 '<div class="block-card__header">' +
-                    '<span class="block-card__handle" title="Перетащить"><i class="bi bi-grip-vertical"></i></span>' +
-                    '<p class="block-card__title"><i class="bi ' + escapeHtml(blockIcon(block.type)) + '"></i> ' + escapeHtml(blockLabel(block.type)) + '</p>' +
-                    '<button type="button" class="btn btn-sm btn-outline-danger block-delete" title="Удалить"><i class="bi bi-trash"></i></button>' +
-                '</div>' +
-                '<div class="block-card__preview">' + escapeHtml(blockPreview(block.props || {})) + '</div>';
-
+                '<span class="block-card__handle"><i class="bi bi-grip-vertical"></i></span>' +
+                '<p class="block-card__title"><i class="bi ' + (meta.icon || 'bi-square') + '"></i> ' + esc(meta.label || row.layout) + '</p>' +
+                '<button type="button" class="btn btn-sm btn-outline-danger row-del"><i class="bi bi-trash"></i></button>' +
+                '</div>';
             card.addEventListener('click', function (e) {
-                if (e.target.closest('.block-delete')) {
-                    return;
-                }
-                selectBlock(index);
+                if (e.target.closest('.row-del')) return;
+                selectRow(idx);
             });
-
-            card.querySelector('.block-delete').addEventListener('click', function (e) {
+            card.querySelector('.row-del').addEventListener('click', function (e) {
                 e.stopPropagation();
-                blocks.splice(index, 1);
-                if (selectedIndex >= blocks.length) {
-                    selectedIndex = blocks.length - 1;
-                }
+                rows.splice(idx, 1);
+                if (selected >= rows.length) selected = rows.length - 1;
                 renderCanvas();
-                if (selectedIndex >= 0) {
-                    renderProps(selectedIndex);
-                }
+                renderPanels();
+                sync();
             });
-
             canvas.appendChild(card);
         });
-
-        syncInput();
         initSortable();
+        sync();
     }
 
-    function selectBlock(index) {
-        selectedIndex = index;
-        updateSelection();
-        renderProps(index);
+    function initSortable() {
+        if (sortable) sortable.destroy();
+        if (typeof Sortable === 'undefined' || rows.length === 0) return;
+        sortable = new Sortable(canvas, {
+            animation: 150,
+            handle: '.block-card__handle',
+            draggable: '.block-card',
+            onEnd: function (evt) {
+                var m = rows.splice(evt.oldIndex, 1)[0];
+                rows.splice(evt.newIndex, 0, m);
+                selected = evt.newIndex;
+                renderCanvas();
+                renderPanels();
+            }
+        });
     }
 
-    function renderProps(index) {
-        var block = blocks[index];
-        if (!block) {
-            propsPanel.innerHTML = '<p class="text-muted small mb-0">Выберите блок на холсте</p>';
+    function esc(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    function selectRow(idx) {
+        selected = idx;
+        renderCanvas();
+        renderPanels();
+    }
+
+    function renderPanels() {
+        var row = rows[selected];
+        if (!row) {
+            fieldPanel.innerHTML = blockStylePanel.innerHTML = elementStylePanel.innerHTML = '<p class="text-muted small">Выберите блок</p>';
             return;
         }
+        var meta = layouts[row.layout] || { subfields: [], elements: [] };
 
-        var meta = blockTypes[block.type] || {};
-        var fields = meta.fields || [];
-        var html = '<p class="small fw-semibold mb-3">' + escapeHtml(blockLabel(block.type)) + '</p>';
+        fieldPanel.innerHTML = '';
+        fieldPanel.appendChild(window.RuEduFieldEditor.renderLayoutEditor(row.layout, meta, row.data, function () {
+            sync();
+        }));
 
-        fields.forEach(function (field) {
-            var key = field.key;
-            var val = block.props[key];
-            var label = field.label || key;
-            var type = field.type || 'text';
+        blockStylePanel.innerHTML = '';
+        (cfg.styleKeys || []).forEach(function (key) {
+            var fg = document.createElement('div');
+            fg.className = 'mb-2';
+            fg.innerHTML = '<label class="form-label small">' + key + '</label><input type="text" class="form-control form-control-sm" data-style-key="' + key + '" value="' + esc(row.style[key] || '') + '">';
+            fg.querySelector('input').addEventListener('input', function (e) {
+                row.style[key] = e.target.value;
+                sync();
+            });
+            blockStylePanel.appendChild(fg);
+        });
 
-            html += '<div class="block-props-field">';
-            html += '<label class="form-label">' + escapeHtml(label) + '</label>';
+        elementStylePanel.innerHTML = '';
+        var elements = meta.elements && meta.elements.length ? meta.elements : ['title', 'subtitle', 'button'];
+        var elSel = document.createElement('select');
+        elSel.className = 'form-select form-select-sm mb-3';
+        elements.forEach(function (el) {
+            var o = document.createElement('option');
+            o.value = el;
+            o.textContent = el;
+            elSel.appendChild(o);
+        });
+        elementStylePanel.appendChild(elSel);
 
-            if (type === 'textarea' || type === 'json') {
-                var textVal = type === 'json' ? JSON.stringify(val, null, 2) : (val || '');
-                html += '<textarea class="form-control form-control-sm prop-input" data-key="' + escapeHtml(key) + '" data-type="' + type + '" rows="' + (type === 'json' ? 6 : 3) + '">' + escapeHtml(String(textVal)) + '</textarea>';
-            } else if (type === 'select') {
-                html += '<select class="form-select form-select-sm prop-input" data-key="' + escapeHtml(key) + '" data-type="select">';
-                (field.options || []).forEach(function (opt) {
-                    html += '<option value="' + escapeHtml(opt) + '"' + (val === opt ? ' selected' : '') + '>' + escapeHtml(opt) + '</option>';
+        var elFields = document.createElement('div');
+        elementStylePanel.appendChild(elFields);
+
+        function renderElStyles() {
+            var el = elSel.value;
+            if (!row.elementStyles[el]) row.elementStyles[el] = {};
+            elFields.innerHTML = '';
+            (cfg.styleKeys || []).slice(0, 8).forEach(function (key) {
+                var fg = document.createElement('div');
+                fg.className = 'mb-2';
+                fg.innerHTML = '<label class="form-label small">' + key + '</label><input type="text" class="form-control form-control-sm" value="' + esc(row.elementStyles[el][key] || '') + '">';
+                fg.querySelector('input').addEventListener('input', function (e) {
+                    row.elementStyles[el][key] = e.target.value;
+                    sync();
                 });
-                html += '</select>';
-            } else if (type === 'checkbox') {
-                html += '<div class="form-check"><input type="checkbox" class="form-check-input prop-input" data-key="' + escapeHtml(key) + '" data-type="checkbox"' + (val ? ' checked' : '') + '></div>';
-            } else if (type === 'number') {
-                html += '<input type="number" class="form-control form-control-sm prop-input" data-key="' + escapeHtml(key) + '" data-type="number" value="' + escapeHtml(String(val != null ? val : '')) + '">';
-            } else {
-                html += '<input type="text" class="form-control form-control-sm prop-input" data-key="' + escapeHtml(key) + '" data-type="text" value="' + escapeHtml(String(val != null ? val : '')) + '">';
-            }
-
-            html += '</div>';
-        });
-
-        propsPanel.innerHTML = html;
-
-        propsPanel.querySelectorAll('.prop-input').forEach(function (input) {
-            var eventName = input.type === 'checkbox' || input.tagName === 'SELECT' ? 'change' : 'input';
-            input.addEventListener(eventName, function () {
-                updateProp(index, input);
+                elFields.appendChild(fg);
             });
-        });
+        }
+        elSel.addEventListener('change', renderElStyles);
+        renderElStyles();
     }
 
-    function updateProp(index, input) {
-        var key = input.getAttribute('data-key');
-        var type = input.getAttribute('data-type');
-        var value;
-
-        if (type === 'checkbox') {
-            value = input.checked;
-        } else if (type === 'number') {
-            value = parseInt(input.value, 10) || 0;
-        } else if (type === 'json') {
-            try {
-                value = JSON.parse(input.value || '[]');
-                input.classList.remove('is-invalid');
-            } catch (e) {
-                input.classList.add('is-invalid');
-                return;
-            }
-        } else {
-            value = input.value;
-        }
-
-        if (!blocks[index].props) {
-            blocks[index].props = {};
-        }
-        blocks[index].props[key] = value;
-        syncInput();
-
-        var preview = canvas.querySelector('[data-index="' + index + '"] .block-card__preview');
-        if (preview) {
-            preview.textContent = blockPreview(blocks[index].props);
-        }
-    }
-
-    document.querySelectorAll('.palette-block').forEach(function (btn) {
+    document.querySelectorAll('.palette-layout').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            var type = btn.getAttribute('data-type');
-            blocks.push({
-                type: type,
-                props: defaultProps(type)
-            });
-            selectedIndex = blocks.length - 1;
+            var layout = btn.getAttribute('data-layout');
+            rows.push(newRow(layout));
+            selected = rows.length - 1;
             renderCanvas();
-            renderProps(selectedIndex);
+            renderPanels();
         });
     });
 
     renderCanvas();
-    if (blocks.length > 0) {
-        selectBlock(0);
-    }
+    if (rows.length) selectRow(0);
+    previewFrame && previewFrame.addEventListener('load', refreshPreview);
 })();

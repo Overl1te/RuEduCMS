@@ -2,18 +2,16 @@
 $page_title = $page['title'];
 include __DIR__ . '/partials/page-header.php';
 ?>
-<div class="container page-content">
-    <?php if (($page['content_mode'] ?? 'html') === 'fields' && !empty($page['field_data'])): ?>
-        <?= \RuEdu\Engine\FieldRenderer::renderEntity('page:' . (int) $page['id']) ?>
-    <?php elseif (($page['content_mode'] ?? 'html') === 'blocks' && !empty($page['content_blocks'])): ?>
+<div class="ed-container ed-page-content">
+    <?php if (($page['content_mode'] ?? 'html') === 'blocks' && !empty($page['content_blocks'])): ?>
         <?= \RuEdu\Engine\BlockRenderer::render($page['content_blocks']) ?>
     <?php else: ?>
-    <div class="content-body" data-animate>
+    <div class="ed-content-body">
         <?= $page['content'] ?>
     </div>
     <?php endif; ?>
     <?php if (($page['slug'] ?? '') === 'informaciya'): ?>
-        <div class="map-section" data-animate>
+        <div class="ed-map-section">
             <?php include __DIR__ . '/partials/yandex-map.php'; ?>
         </div>
     <?php endif; ?>

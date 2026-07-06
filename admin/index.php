@@ -20,6 +20,11 @@ use RuEdu\Engine\ThemeManager;
 use RuEdu\Engine\ThemeInstaller;
 use RuEdu\Engine\BlockRegistry;
 use RuEdu\Engine\BlockRenderer;
+use RuEdu\Engine\FieldGroupEngine;
+use RuEdu\Engine\FieldRenderer;
+use RuEdu\Engine\FieldValueStore;
+use RuEdu\Engine\ElementStyles;
+use RuEdu\Model\FieldGroup;
 use RuEdu\Engine\SetupRecommendations;
 use RuEdu\Engine\SiteSetup;
 use RuEdu\Engine\HelpDocs;
@@ -312,7 +317,7 @@ $router->post('/pages/save', function () {
         'author_id' => Auth::id(),
     ];
 
-    if (isset($_POST['content_mode']) && in_array($_POST['content_mode'], ['html', 'blocks'], true)) {
+    if (isset($_POST['content_mode']) && in_array($_POST['content_mode'], ['html', 'blocks', 'fields'], true)) {
         $data['content_mode'] = $_POST['content_mode'];
     }
 
@@ -343,22 +348,24 @@ $router->get('/pages/builder/{id}', function (array $p) use ($admin) {
         Router::redirect('admin/pages');
     }
 
-    $blocks = [];
-    if (!empty($page['content_blocks'])) {
-        $decoded = json_decode((string) $page['content_blocks'], true);
-        $blocks = is_array($decoded) ? BlockRenderer::normalizeBlocks($decoded) : [];
+    $entity = 'page:' . (int) $page['id'];
+    $schema = FieldRenderer::getSchemaForEntity($entity);
+    $values = $schema['values'];
+    if ($values === []) {
+        $values = FieldRenderer::normalizeFlexibleValues([]);
     }
 
     $builderType = 'page';
+    $entityKey = $entity;
     $title = 'Конструктор: ' . ($page['title'] ?? '');
     $saveUrl = url('admin/pages/builder/save');
     $backUrl = url('admin/pages/edit/' . (int) $page['id']);
-    $blockTypes = BlockRegistry::forContext('page');
-    foreach (BlockRegistry::forContext('all') as $type => $meta) {
-        $blockTypes[$type] = $meta;
-    }
+    $previewUrl = route('page/' . ($page['slug'] ?? ''));
+    $layouts = $schema['layouts'];
+    $page = $page;
+    $systemId = null;
 
-    $admin->render('pages/builder', compact('builderType', 'title', 'saveUrl', 'backUrl', 'blocks', 'blockTypes', 'page'));
+    $admin->render('pages/builder', compact('builderType', 'entityKey', 'title', 'saveUrl', 'backUrl', 'previewUrl', 'values', 'layouts', 'page', 'systemId'));
 });
 
 $router->post('/pages/builder/save', function () {
@@ -373,16 +380,12 @@ $router->post('/pages/builder/save', function () {
         Router::redirect('admin/pages');
     }
 
-    $raw = $_POST['blocks'] ?? '[]';
+    $raw = $_POST['field_data'] ?? '[]';
     $decoded = json_decode(is_string($raw) ? $raw : '[]', true);
-    $blocks = BlockRenderer::normalizeBlocks(is_array($decoded) ? $decoded : []);
+    $values = FieldRenderer::normalizeFlexibleValues(is_array($decoded) ? $decoded : []);
 
-    Page::update($id, [
-        'content_mode' => 'blocks',
-        'content_blocks' => json_encode($blocks, JSON_UNESCAPED_UNICODE),
-    ]);
+    FieldValueStore::save('page:' . $id, $values);
 
-    Cache::flush();
     Session::flash('success', 'Структура страницы сохранена');
     Router::redirect('admin/pages/builder/' . $id);
 });
@@ -390,22 +393,24 @@ $router->post('/pages/builder/save', function () {
 $router->get('/home/builder', function () use ($admin) {
     Auth::requireEditor();
 
-    $blocks = BlockRenderer::getHomeLayout();
-    if ($blocks === []) {
-        $blocks = BlockRenderer::defaultHomeLayout();
+    $entity = 'home';
+    $schema = FieldRenderer::getSchemaForEntity($entity);
+    $values = $schema['values'];
+    if ($values === []) {
+        $values = FieldRenderer::defaultHomeFieldData();
     }
 
     $builderType = 'home';
+    $entityKey = $entity;
     $title = 'Конструктор главной страницы';
     $saveUrl = url('admin/home/builder/save');
     $backUrl = url('admin/pages');
-    $blockTypes = BlockRegistry::forContext('home');
-    foreach (BlockRegistry::forContext('all') as $type => $meta) {
-        $blockTypes[$type] = $meta;
-    }
+    $previewUrl = route('');
+    $layouts = $schema['layouts'];
     $page = null;
+    $systemId = null;
 
-    $admin->render('pages/builder', compact('builderType', 'title', 'saveUrl', 'backUrl', 'blocks', 'blockTypes', 'page'));
+    $admin->render('pages/builder', compact('builderType', 'entityKey', 'title', 'saveUrl', 'backUrl', 'previewUrl', 'values', 'layouts', 'page', 'systemId'));
 });
 
 $router->post('/home/builder/save', function () {
@@ -414,14 +419,163 @@ $router->post('/home/builder/save', function () {
         Router::redirect('admin/home/builder');
     }
 
-    $raw = $_POST['blocks'] ?? '[]';
+    $raw = $_POST['field_data'] ?? '[]';
     $decoded = json_decode(is_string($raw) ? $raw : '[]', true);
-    $blocks = BlockRenderer::normalizeBlocks(is_array($decoded) ? $decoded : []);
+    $values = FieldRenderer::normalizeFlexibleValues(is_array($decoded) ? $decoded : []);
 
-    BlockRenderer::saveHomeLayout($blocks);
+    FieldValueStore::save('home', $values);
 
     Session::flash('success', 'Главная страница сохранена');
     Router::redirect('admin/home/builder');
+});
+
+$router->get('/pages/structure/{id}', function (array $p) use ($admin) {
+    Auth::requireEditor();
+    $systemId = $p['id'] ?? '';
+    $pages = SystemPages::getAll();
+    $systemPage = null;
+    foreach ($pages as $sp) {
+        if (($sp['id'] ?? '') === $systemId) {
+            $systemPage = $sp;
+            break;
+        }
+    }
+    if ($systemPage === null || !empty($systemPage['content_url'])) {
+        Router::redirect('admin/pages');
+    }
+
+    $entity = 'system:' . $systemId;
+    $schema = FieldRenderer::getSchemaForEntity($entity);
+    if ($schema['layouts'] === []) {
+        $schema = FieldRenderer::getSchemaForEntity('home');
+    }
+    $values = FieldValueStore::get($entity);
+    if ($values === []) {
+        $values = [];
+    }
+
+    $builderType = 'system';
+    $entityKey = $entity;
+    $title = 'Структура: ' . ($systemPage['title'] ?? '');
+    $saveUrl = url('admin/pages/structure/save');
+    $backUrl = url('admin/pages');
+    $previewUrl = route(ltrim((string) ($systemPage['url'] ?? '/'), '/'));
+    $layouts = $schema['layouts'];
+    $page = null;
+
+    $admin->render('pages/builder', compact('builderType', 'entityKey', 'title', 'saveUrl', 'backUrl', 'previewUrl', 'values', 'layouts', 'page', 'systemId'));
+});
+
+$router->post('/pages/structure/save', function () {
+    Auth::requireEditor();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/pages');
+    }
+
+    $systemId = trim($_POST['system_id'] ?? '');
+    if ($systemId === '') {
+        Router::redirect('admin/pages');
+    }
+
+    $raw = $_POST['field_data'] ?? '[]';
+    $decoded = json_decode(is_string($raw) ? $raw : '[]', true);
+    $values = FieldRenderer::normalizeFlexibleValues(is_array($decoded) ? $decoded : []);
+
+    FieldValueStore::save('system:' . $systemId, $values);
+
+    Session::flash('success', 'Структура страницы сохранена');
+    Router::redirect('admin/pages/structure/' . rawurlencode($systemId));
+});
+
+// Field Groups
+$router->get('/field-groups', function () use ($admin) {
+    Auth::requireAdmin();
+    $groups = FieldGroup::getAll();
+    $admin->render('field-groups/index', compact('groups'));
+});
+
+$router->get('/field-groups/edit/{id}', function (array $p) use ($admin) {
+    Auth::requireAdmin();
+    $id = (int) ($p['id'] ?? 0);
+    $group = $id > 0 ? FieldGroup::getById($id) : null;
+    $fieldsTree = $id > 0 ? FieldGroupEngine::buildTree($id) : [];
+    $admin->render('field-groups/edit', compact('group', 'fieldsTree'));
+});
+
+$router->post('/field-groups/save', function () {
+    Auth::requireAdmin();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/field-groups');
+    }
+
+    $locations = $_POST['locations_json'] ?? '[]';
+    if (is_string($locations)) {
+        $locations = json_decode($locations, true) ?: [];
+    }
+
+    $fieldsTree = $_POST['fields_json'] ?? '[]';
+    if (is_string($fieldsTree)) {
+        $fieldsTree = json_decode($fieldsTree, true) ?: [];
+    }
+
+    $id = FieldGroupEngine::saveGroup([
+        'id' => (int) ($_POST['id'] ?? 0),
+        'title' => $_POST['title'] ?? '',
+        'slug' => $_POST['slug'] ?? '',
+        'locations' => $locations,
+        'is_active' => !empty($_POST['is_active']),
+        'sort_order' => (int) ($_POST['sort_order'] ?? 0),
+    ], is_array($fieldsTree) ? $fieldsTree : []);
+
+    Session::flash('success', 'Группа полей сохранена');
+    Router::redirect('admin/field-groups/edit/' . $id);
+});
+
+$router->post('/field-groups/delete/{id}', function (array $p) {
+    Auth::requireAdmin();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/field-groups');
+    }
+    FieldGroup::delete((int) ($p['id'] ?? 0));
+    Cache::flush();
+    Session::flash('success', 'Группа удалена');
+    Router::redirect('admin/field-groups');
+});
+
+$router->get('/api/field-groups/for-entity', function () {
+    Auth::requireEditor();
+    header('Content-Type: application/json; charset=utf-8');
+    $entity = (string) ($_GET['entity'] ?? '');
+    echo json_encode(FieldRenderer::getSchemaForEntity($entity), JSON_UNESCAPED_UNICODE);
+    exit;
+});
+
+$router->get('/api/media', function () {
+    Auth::requireEditor();
+    header('Content-Type: application/json; charset=utf-8');
+    $items = Media::getAll(100);
+    foreach ($items as &$item) {
+        $item['url'] = Media::getUrl((string) ($item['path'] ?? ''));
+    }
+    unset($item);
+    echo json_encode($items, JSON_UNESCAPED_UNICODE);
+    exit;
+});
+
+$router->post('/api/preview/render', function () {
+    Auth::requireEditor();
+    header('Content-Type: application/json; charset=utf-8');
+    $raw = file_get_contents('php://input');
+    $payload = json_decode($raw ?: '[]', true);
+    $rows = is_array($payload['field_data'] ?? null) ? $payload['field_data'] : [];
+    $entity = (string) ($payload['entity'] ?? 'home');
+    $context = FieldValueStore::getContext($entity);
+    if ($entity === 'home') {
+        $context['articles'] = Article::getAll('published', 10);
+    }
+    $html = FieldRenderer::renderFlexibleRows(FieldRenderer::normalizeFlexibleValues($rows), $context);
+    echo json_encode(['html' => $html], JSON_UNESCAPED_UNICODE);
+    exit;
 });
 
 $router->post('/pages/delete/{id}', function (array $p) {

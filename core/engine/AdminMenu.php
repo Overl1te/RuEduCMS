@@ -17,6 +17,7 @@ class AdminMenu
             ['title' => 'Пользователи', 'url' => Router::path('admin/users'), 'icon' => 'bi-people'],
             ['title' => 'Модули', 'url' => Router::path('admin/modules'), 'icon' => 'bi-puzzle'],
             ['title' => 'Темы', 'url' => Router::path('admin/themes'), 'icon' => 'bi-palette'],
+            ['title' => 'Группы полей', 'url' => Router::path('admin/field-groups'), 'icon' => 'bi-input-cursor-text'],
             ['title' => 'Обновления', 'url' => Router::path('admin/updates'), 'icon' => 'bi-arrow-repeat'],
             ['title' => 'Справка', 'url' => Router::path('admin/help'), 'icon' => 'bi-question-circle'],
             ['title' => 'Настройки', 'url' => Router::path('admin/settings'), 'icon' => 'bi-gear'],
