@@ -20,10 +20,17 @@ Hook::on('register_routes', function ($router) {
             $data[$s['section']] = json_decode($s['data'], true);
         }
 
+        $sectionList = SvedenModule::getSectionList();
+        $sectionFields = [];
+        foreach (array_keys($sectionList) as $key) {
+            $sectionFields[$key] = SvedenModule::getSectionFields($key);
+        }
+
         $template = new Template();
         echo $template->setData([
             'sections' => $data,
-            'sectionList' => SvedenModule::getSectionList(),
+            'sectionList' => $sectionList,
+            'sectionFields' => $sectionFields,
             'menu' => Menu::getByLocation('main'),
             'meta' => SEO::metaTags(['title' => 'Сведения об образовательной организации — ' . Config::get('site_name')]),
         ])->render('sveden');

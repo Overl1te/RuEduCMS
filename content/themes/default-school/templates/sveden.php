@@ -16,7 +16,7 @@
                     <?php foreach ($sections[$key] as $field => $value): ?>
                         <?php if ($value): ?>
                             <tr>
-                                <td><?= htmlspecialchars(ucfirst(str_replace('_', ' ', $field))) ?></td>
+                                <td><?= htmlspecialchars($sectionFields[$key][$field] ?? $field) ?></td>
                                 <td><?= nl2br(htmlspecialchars($value)) ?></td>
                             </tr>
                         <?php endif; ?>
