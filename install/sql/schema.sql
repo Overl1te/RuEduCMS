@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS `{{prefix}}schedule` (
     `class_name` VARCHAR(50) NOT NULL,
     `day_of_week` TINYINT NOT NULL,
     `lesson_number` TINYINT NOT NULL,
+    `lesson_time` VARCHAR(50) DEFAULT '',
     `subject` VARCHAR(255) NOT NULL,
     `teacher` VARCHAR(255) DEFAULT '',
     `room` VARCHAR(50) DEFAULT '',

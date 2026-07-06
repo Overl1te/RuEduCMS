@@ -22,6 +22,9 @@
                         <?php foreach (array_keys($days) as $day): ?>
                             <td>
                                 <?php if (isset($schedule[$day][$lesson])): ?>
+                                    <?php if (!empty($schedule[$day][$lesson]['lesson_time'])): ?>
+                                        <small><?= htmlspecialchars($schedule[$day][$lesson]['lesson_time']) ?></small><br>
+                                    <?php endif; ?>
                                     <strong><?= htmlspecialchars($schedule[$day][$lesson]['subject']) ?></strong><br>
                                     <small><?= htmlspecialchars($schedule[$day][$lesson]['teacher']) ?></small><br>
                                     <small>каб. <?= htmlspecialchars($schedule[$day][$lesson]['room']) ?></small>

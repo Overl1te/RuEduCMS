@@ -154,6 +154,7 @@ Hook::on('register_admin_routes', function ($router) use ($days) {
             'class_name' => trim($_POST['class_name'] ?? ''),
             'day_of_week' => (int) ($_POST['day_of_week'] ?? 1),
             'lesson_number' => (int) ($_POST['lesson_number'] ?? 1),
+            'lesson_time' => trim($_POST['lesson_time'] ?? ''),
             'subject' => trim($_POST['subject'] ?? ''),
             'teacher' => trim($_POST['teacher'] ?? ''),
             'room' => trim($_POST['room'] ?? ''),

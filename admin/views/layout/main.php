@@ -24,7 +24,7 @@
                 </li>
             <?php endforeach; ?>
         </ul>
-        <div class="mt-auto pt-4 border-top border-secondary">
+        <div class="pt-4 mt-3 border-top border-secondary">
             <a href="<?= url('') ?>" class="nav-link text-white-50" target="_blank"><i class="bi bi-box-arrow-up-right"></i> Сайт</a>
             <a href="<?= url('admin/logout') ?>" class="nav-link text-white-50"><i class="bi bi-box-arrow-right"></i> Выход</a>
         </div>
