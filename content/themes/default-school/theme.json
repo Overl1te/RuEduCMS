@@ -1,7 +1,7 @@
 {
     "name": "Школьная тема",
     "slug": "default-school",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "author": "RuEduCMS",
     "description": "Тема оформления для типового сайта образовательного учреждения",
     "screenshot": "assets/screenshot.png"

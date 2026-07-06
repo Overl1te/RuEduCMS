@@ -4,7 +4,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggle = document.getElementById('menuToggle');
     const nav = document.getElementById('mainNav');
     if (toggle && nav) {
-        toggle.addEventListener('click', () => nav.classList.toggle('open'));
+        toggle.addEventListener('click', () => {
+            const open = nav.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
     }
 
     // A11y toggle

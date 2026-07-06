@@ -1,25 +1,26 @@
-$primary: #1a56db;
-$primary-dark: #1e40af;
-$text: #1f2937;
-$text-light: #6b7280;
-$bg: #ffffff;
-$bg-alt: #f9fafb;
-$border: #e5e7eb;
-$radius: 8px;
+// RuEduCMS — Школьная тема v2 (переменные)
+// Основные стили в css/main.css; при scss_runtime=true компилируйте этот файл.
 
-// Импорт скомпилированного CSS — при разработке темы редактируйте этот файл
-// и компилируйте в css/main.css
+$primary: #1a4d8c;
+$primary-dark: #0f3460;
+$primary-light: #2d6cb5;
+$accent: #c9952c;
+$accent-light: #e8b84a;
+$text: #1a2332;
+$text-light: #5c6b7f;
+$bg: #ffffff;
+$bg-alt: #f4f7fb;
+$border: #e2e8f0;
+$radius: 12px;
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     color: $text;
     background: $bg;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px;
 }
-
-// Дополнительные стили темы добавляйте здесь

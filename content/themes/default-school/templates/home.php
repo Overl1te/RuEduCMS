@@ -1,6 +1,8 @@
 <?php ob_start(); ?>
 <section class="hero">
-    <div class="container">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="container hero-inner">
+        <p class="hero-badge">Официальный сайт</p>
         <h1><?= htmlspecialchars($site_name ?? '') ?></h1>
         <p class="hero-subtitle">Добро пожаловать на официальный сайт образовательного учреждения</p>
         <div class="hero-links">
@@ -14,7 +16,10 @@
 <?php if (!empty($articles)): ?>
 <section class="section news-section">
     <div class="container">
-        <h2 class="section-title">Последние новости</h2>
+        <div class="section-header">
+            <h2 class="section-title">Последние новости</h2>
+            <p class="section-subtitle">Актуальные события и объявления</p>
+        </div>
         <div class="news-grid">
             <?php foreach ($articles as $article): ?>
                 <article class="news-card">
@@ -31,13 +36,29 @@
 </section>
 <?php endif; ?>
 
-<section class="section quick-links">
+<section class="section quick-links section-alt">
     <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Быстрые ссылки</h2>
+            <p class="section-subtitle">Основные разделы сайта</p>
+        </div>
         <div class="links-grid">
-            <a href="<?= route('staff') ?>" class="link-card"><span class="link-icon">👨‍🏫</span><span>Педагогический состав</span></a>
-            <a href="<?= route('schedule') ?>" class="link-card"><span class="link-icon">📅</span><span>Расписание</span></a>
-            <a href="<?= route('documents') ?>" class="link-card"><span class="link-icon">📄</span><span>Документы</span></a>
-            <a href="<?= route('gallery') ?>" class="link-card"><span class="link-icon">📷</span><span>Галерея</span></a>
+            <a href="<?= route('staff') ?>" class="link-card">
+                <span class="link-icon link-icon-staff" aria-hidden="true"></span>
+                <span class="link-label">Педагогический состав</span>
+            </a>
+            <a href="<?= route('schedule') ?>" class="link-card">
+                <span class="link-icon link-icon-schedule" aria-hidden="true"></span>
+                <span class="link-label">Расписание</span>
+            </a>
+            <a href="<?= route('documents') ?>" class="link-card">
+                <span class="link-icon link-icon-docs" aria-hidden="true"></span>
+                <span class="link-label">Документы</span>
+            </a>
+            <a href="<?= route('gallery') ?>" class="link-card">
+                <span class="link-icon link-icon-gallery" aria-hidden="true"></span>
+                <span class="link-label">Галерея</span>
+            </a>
         </div>
     </div>
 </section>
