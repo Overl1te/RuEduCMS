@@ -26,9 +26,11 @@ class SiteBranding
 
     public static function logoPath(): string
     {
-        $custom = trim((string) Setting::get('site_logo', ''));
-        if ($custom !== '' && is_file(UPLOADS_PATH . '/' . ltrim($custom, '/'))) {
-            return 'uploads/' . ltrim($custom, '/');
+        if (Config::isInstalled()) {
+            $custom = trim((string) Setting::get('site_logo', ''));
+            if ($custom !== '' && is_file(UPLOADS_PATH . '/' . ltrim($custom, '/'))) {
+                return 'uploads/' . ltrim($custom, '/');
+            }
         }
 
         return self::DEFAULT_LOGO;
@@ -46,6 +48,10 @@ class SiteBranding
 
     public static function isCustom(): bool
     {
+        if (!Config::isInstalled()) {
+            return false;
+        }
+
         $custom = trim((string) Setting::get('site_logo', ''));
         return $custom !== '' && is_file(UPLOADS_PATH . '/' . ltrim($custom, '/'));
     }
