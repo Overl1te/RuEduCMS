@@ -633,18 +633,24 @@ a { color: var(--primary); }
     margin-bottom: 12px;
 }
 
+.contacts-map {
+    width: 100%;
+    min-width: 0;
+}
+
 .map-container {
     width: 100%;
     min-height: 450px;
     border-radius: var(--radius);
-    overflow: hidden;
     box-shadow: var(--shadow-md);
     background: var(--bg-alt);
+    position: relative;
 }
 
-.map-container iframe {
-    display: block;
-    width: 100%;
+.map-container iframe,
+.map-container > div {
+    display: block !important;
+    width: 100% !important;
     min-height: 450px;
     height: 450px;
     border: 0;

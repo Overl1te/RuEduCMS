@@ -33,39 +33,17 @@ class YandexMap
         }
 
         if (preg_match('/<iframe\b/i', $raw)) {
-            return self::buildIframe(self::extractIframeSrc($raw) ?? '');
-        }
-
-        if (preg_match('/<script\b/i', $raw)) {
-            return self::buildScript(self::extractScriptSrc($raw) ?? '');
-        }
-
-        $url = self::extractUrl($raw);
-        if ($url !== null) {
-            return self::buildIframe($url);
-        }
-
-        return '';
-    }
-
-    /**
-     * Нормализация кода карты перед сохранением в настройках.
-     */
-    public static function normalizeForStorage(string $raw): string
-    {
-        $raw = self::normalizeInput($raw);
-        if ($raw === '') {
-            return '';
-        }
-
-        if (preg_match('/<iframe\b/i', $raw)) {
             $src = self::extractIframeSrc($raw);
-            return $src !== null ? self::buildIframe($src) : '';
+            if ($src !== null) {
+                return self::buildIframe($src);
+            }
         }
 
         if (preg_match('/<script\b/i', $raw)) {
             $src = self::extractScriptSrc($raw);
-            return $src !== null ? self::buildScript($src) : '';
+            if ($src !== null) {
+                return self::buildScript($src);
+            }
         }
 
         $url = self::extractUrl($raw);
@@ -92,52 +70,79 @@ class YandexMap
 
     private static function extractUrl(string $raw): ?string
     {
-        if (preg_match('#\bhttps?://[^\s<>"\']+#i', $raw, $match) !== 1) {
+        if (!preg_match('#(?:https?:)?//[^\s<>"\']+#i', $raw, $match)
+            && !preg_match('#\bhttps?://[^\s<>"\']+#i', $raw, $match)) {
             return null;
         }
 
         $url = html_entity_decode($match[0], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (str_starts_with($url, '//')) {
+            $url = 'https:' . $url;
+        } elseif (!preg_match('#^https?://#i', $url)) {
+            $url = 'https://' . ltrim($url, '/');
+        }
 
-        return self::isAllowedHost($url) ? $url : null;
+        if (!self::isAllowedHost($url)) {
+            return null;
+        }
+
+        return self::toEmbedUrl($url);
     }
 
     private static function extractIframeSrc(string $html): ?string
     {
-        if (preg_match('#<iframe\b[^>]*\bsrc=["\']([^"\']+)#i', $html, $match) !== 1) {
+        if (!preg_match('#\bsrc\s*=\s*(["\'])([^"\']+)\1#i', $html, $match)
+            && !preg_match('#\bsrc\s*=\s*([^\s>]+)#i', $html, $match)) {
             return null;
         }
 
-        $src = html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $src = html_entity_decode($match[2] ?? $match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (str_starts_with($src, '//')) {
+            $src = 'https:' . $src;
+        }
 
-        return self::isAllowedHost($src) ? $src : null;
+        if (!self::isAllowedHost($src)) {
+            return null;
+        }
+
+        return self::toEmbedUrl($src);
     }
 
     private static function extractScriptSrc(string $html): ?string
     {
-        if (preg_match('#<script\b[^>]*\bsrc=["\']([^"\']+)#i', $html, $match) !== 1) {
+        if (!preg_match('#\bsrc\s*=\s*(["\'])([^"\']+)\1#i', $html, $match)) {
             return null;
         }
 
-        $src = html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $src = html_entity_decode($match[2], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (str_starts_with($src, '//')) {
+            $src = 'https:' . $src;
+        }
 
         return self::isAllowedHost($src) ? $src : null;
+    }
+
+    /**
+     * Обычная ссылка yandex.ru/maps/... → формат для встраивания.
+     */
+    private static function toEmbedUrl(string $url): string
+    {
+        if (str_contains($url, 'map-widget')) {
+            return $url;
+        }
+
+        if (preg_match('#https?://([^/]+\.yandex\.[^/]+)/maps/-/(\\w[\w-]*)#i', $url, $match)) {
+            return 'https://' . $match[1] . '/map-widget/v1/-/' . $match[2];
+        }
+
+        return $url;
     }
 
     private static function isAllowedHost(string $url): bool
     {
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
 
-        if ($host === '') {
-            return false;
-        }
-
-        return in_array($host, [
-            'yandex.ru',
-            'yandex.com',
-            'yandex.kz',
-            'yandex.by',
-            'api-maps.yandex.ru',
-        ], true) || str_ends_with($host, '.yandex.ru') || str_ends_with($host, '.yandex.com');
+        return $host !== '' && str_contains($host, 'yandex.');
     }
 
     private static function buildIframe(string $src): string
@@ -149,7 +154,10 @@ class YandexMap
         $src = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
         $height = self::HEIGHT;
 
-        return '<iframe src="' . $src . '" width="100%" height="' . $height . '" style="border:0;" allowfullscreen loading="lazy" title="Карта"></iframe>';
+        return '<iframe src="' . $src . '" width="100%" height="' . $height . '"'
+            . ' frameborder="0" allowfullscreen="true"'
+            . ' style="display:block;width:100%;height:' . $height . 'px;border:0;"'
+            . ' title="Карта"></iframe>';
     }
 
     private static function buildScript(string $src): string

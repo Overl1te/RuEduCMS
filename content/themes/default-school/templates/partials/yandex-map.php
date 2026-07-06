@@ -1,8 +1,10 @@
 <?php
 
 use RuEdu\Engine\YandexMap;
+use RuEdu\Model\Setting;
 
-$mapHtml = $yandex_map ?? YandexMap::fromSettings();
+$rawMap = trim((string) ($yandex_map_raw ?? Setting::get('yandex_map', '')));
+$mapHtml = $rawMap !== '' ? YandexMap::embedHtml($rawMap) : ($yandex_map ?? '');
 $showMapEmpty = !empty($show_map_empty);
 
 if ($mapHtml !== ''): ?>

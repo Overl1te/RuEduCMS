@@ -69,7 +69,8 @@ $s = $settings;
                         <a href="<?= route('contacts') ?>" target="_blank">Контакты</a>,
                         <a href="<?= route('sveden') ?>" target="_blank">Сведения об ОО</a> (раздел «Основные сведения»)
                         и <a href="<?= route('page/informaciya') ?>" target="_blank">Информация</a>.
-                        Вставьте код <code>&lt;iframe&gt;</code> из конструктора Яндекс.Карт или прямую ссылку на карту.
+                        Вставьте код <code>&lt;iframe&gt;</code> из конструктора Яндекс.Карт (кнопка «Поделиться») или ссылку вида
+                        <code>https://yandex.ru/map-widget/v1/...</code>.
                     </div>
                 </div>
             </div></div>
