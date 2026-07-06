@@ -3,7 +3,9 @@ $page_title = $page['title'];
 include __DIR__ . '/partials/page-header.php';
 ?>
 <div class="ed-container ed-page-content">
-    <?php if (($page['content_mode'] ?? 'html') === 'blocks' && !empty($page['content_blocks'])): ?>
+    <?php if (($page['content_mode'] ?? 'html') === 'fields' && !empty($page['field_data'])): ?>
+        <?= \RuEdu\Engine\FieldRenderer::renderEntity('page:' . (int) $page['id']) ?>
+    <?php elseif (($page['content_mode'] ?? 'html') === 'blocks' && !empty($page['content_blocks'])): ?>
         <?= \RuEdu\Engine\BlockRenderer::render($page['content_blocks']) ?>
     <?php else: ?>
     <div class="ed-content-body">

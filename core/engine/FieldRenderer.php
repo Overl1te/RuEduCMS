@@ -14,15 +14,32 @@ class FieldRenderer
     public static function renderEntity(string $entity, array $context = []): string
     {
         $rows = FieldValueStore::get($entity);
+
+        if ($entity === 'home') {
+            $context['articles'] = $context['articles'] ?? Article::getAll('published', 10);
+            if ($rows === []) {
+                $rows = self::resolveHomeRows();
+            }
+        }
+
         if ($rows === []) {
             return '';
         }
 
-        if ($entity === 'home') {
-            $context['articles'] = $context['articles'] ?? Article::getAll('published', 10);
+        return self::renderFlexibleRows($rows, $context);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private static function resolveHomeRows(): array
+    {
+        $legacy = BlockRenderer::getHomeLayout();
+        if ($legacy !== []) {
+            return self::legacyBlocksToFieldData($legacy);
         }
 
-        return self::renderFlexibleRows($rows, $context);
+        return self::defaultHomeFieldData();
     }
 
     /**

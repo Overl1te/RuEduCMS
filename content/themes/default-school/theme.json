@@ -19,6 +19,7 @@
                     { "key": "--teal", "label": "Бирюзовый", "type": "color", "default": "#14b8a6" },
                     { "key": "--text", "label": "Текст", "type": "color", "default": "#0f172a" },
                     { "key": "--text-light", "label": "Текст (светлый)", "type": "color", "default": "#475569" },
+                    { "key": "--text-muted", "label": "Текст (приглушённый)", "type": "color", "default": "#94a3b8" },
                     { "key": "--bg", "label": "Фон", "type": "color", "default": "#ffffff" },
                     { "key": "--bg-alt", "label": "Фон (альтернативный)", "type": "color", "default": "#f1f5f9" },
                     { "key": "--border", "label": "Границы", "type": "color", "default": "#e2e8f0" }
@@ -40,7 +41,8 @@
                 "fields": [
                     { "key": "--radius", "label": "Скругление", "type": "range", "min": 0, "max": 32, "unit": "px", "default": "16px" },
                     { "key": "--radius-sm", "label": "Скругление (мелкое)", "type": "range", "min": 0, "max": 24, "unit": "px", "default": "10px" },
-                    { "key": "--radius-lg", "label": "Скругление (крупное)", "type": "range", "min": 0, "max": 48, "unit": "px", "default": "24px" }
+                    { "key": "--radius-lg", "label": "Скругление (крупное)", "type": "range", "min": 0, "max": 48, "unit": "px", "default": "24px" },
+                    { "key": "--radius-xl", "label": "Скругление (очень крупное)", "type": "range", "min": 0, "max": 64, "unit": "px", "default": "32px" }
                 ]
             }
         ]

@@ -119,6 +119,7 @@ class Migrate
                 && self::columnExists($pdo, $prefix . 'pages', 'field_data'),
             '0.0.14' => static fn (): bool => self::tableExists($pdo, $prefix . 'field_groups')
                 && self::fieldGroupSlugExists($pdo, $prefix, 'home-page'),
+            '0.0.15' => static fn (): bool => self::settingExists($pdo, $prefix, 'home_field_data'),
         ];
 
         foreach (Version::getMigrationFiles() as $version => $_) {
@@ -159,6 +160,14 @@ class Migrate
 
         if (self::tableExists($pdo, $groups) && !self::fieldGroupSlugExists($pdo, $prefix, 'home-page')) {
             self::runMigrationFile(CORE_PATH . '/migrations/0.0.14.php', '0.0.14');
+        }
+
+        if (
+            self::tableExists($pdo, $groups)
+            && self::fieldGroupSlugExists($pdo, $prefix, 'home-page')
+            && !self::settingExists($pdo, $prefix, 'home_field_data')
+        ) {
+            self::runMigrationFile(CORE_PATH . '/migrations/0.0.15.php', '0.0.15');
         }
 
         $detected = self::detectAppliedVersion($pdo, $prefix);
