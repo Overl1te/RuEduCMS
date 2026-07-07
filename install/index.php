@@ -12,6 +12,7 @@ use RuEdu\Engine\Migrate;
 use RuEdu\Engine\Version;
 use RuEdu\Engine\SiteStructure;
 use RuEdu\Engine\SiteSetup;
+use RuEdu\Engine\Session;
 use RuEdu\Model\User;
 use RuEdu\Model\Setting;
 
@@ -25,8 +26,12 @@ $installConfig = Config::load();
 $step = (int) ($_GET['step'] ?? 1);
 $errors = [];
 $success = false;
+$installCsrf = Session::csrfToken();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        $errors[] = 'Ошибка безопасности. Обновите страницу и попробуйте снова.';
+    } else {
     switch ($step) {
         case 2:
             $host = trim($_POST['db_host'] ?? 'localhost');
@@ -88,8 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors[] = 'Укажите корректный логин';
             }
 
-            if (strlen($adminPass) < 6) {
-                $errors[] = 'Пароль должен быть не менее 6 символов';
+            if (strlen($adminPass) < 8 || !preg_match('/\d/', $adminPass)) {
+                $errors[] = 'Пароль должен быть не менее 8 символов и содержать хотя бы одну цифру';
             }
             if (!filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
                 $errors[] = 'Некорректный email';
@@ -150,6 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             break;
+    }
     }
 }
 

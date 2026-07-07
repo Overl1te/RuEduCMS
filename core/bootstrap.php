@@ -44,8 +44,26 @@ if (!file_exists(CONFIG_FILE) && file_exists($legacyConfig)) {
     @rmdir(ROOT_PATH . '/config');
 }
 
+if (file_exists(CONFIG_FILE)) {
+    \RuEdu\Engine\Config::load();
+}
+
+$secureCookies = str_starts_with((string) \RuEdu\Engine\Config::get('site_url', ''), 'https://');
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => $secureCookies,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+
+if (file_exists(CONFIG_FILE) && \RuEdu\Engine\Config::isInstalled()) {
+    \RuEdu\Engine\Request::enforcePostSizeLimit();
+    \RuEdu\Engine\SecurityHeaders::apply();
 }
 
 \RuEdu\Engine\ErrorHandler::register();

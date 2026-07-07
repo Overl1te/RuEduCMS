@@ -2,6 +2,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Медиабиблиотека</h2>
     <form method="POST" action="<?= url('admin/media/upload') ?>" enctype="multipart/form-data" class="d-flex gap-2">
+        <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf_token) ?>">
         <input type="file" name="file" class="form-control form-control-sm" required>
         <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-upload"></i> Загрузить</button>
     </form>

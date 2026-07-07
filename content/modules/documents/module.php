@@ -9,6 +9,7 @@ use RuEdu\Engine\Auth;
 use RuEdu\Engine\Session;
 use RuEdu\Engine\Router;
 use RuEdu\Engine\Media;
+use RuEdu\Engine\UrlSafety;
 use RuEdu\Model\Menu;
 
 Hook::on('register_routes', function ($router) {
@@ -45,7 +46,11 @@ Hook::on('register_admin_routes', function ($router) {
         Auth::requireEditor();
         if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) Router::redirect('admin/documents');
         $db = Database::getInstance();
-        $filePath = $_POST['existing_file'] ?? '';
+        $filePath = trim((string) ($_POST['existing_file'] ?? ''));
+
+        if ($filePath !== '' && !UrlSafety::isSafeUploadRelativePath($filePath)) {
+            $filePath = '';
+        }
 
         if (!empty($_FILES['file']['name'])) {
             $upload = Media::upload($_FILES['file'], Auth::id());
@@ -70,6 +75,9 @@ Hook::on('register_admin_routes', function ($router) {
 
     $router->post('/documents/delete/{id}', function ($p) {
         Auth::requireEditor();
+        if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+            Router::redirect('admin/documents');
+        }
         Database::getInstance()->delete('documents', 'id = ?', [(int)$p['id']]);
         Router::redirect('admin/documents');
     });

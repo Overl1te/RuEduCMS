@@ -23,6 +23,7 @@ use RuEdu\Engine\SiteSetup;
 use RuEdu\Engine\HelpDocs;
 use RuEdu\Engine\SystemPages;
 use RuEdu\Engine\SearchIndexer;
+use RuEdu\Engine\HtmlSanitizer;
 use RuEdu\Model\Page;
 use RuEdu\Model\Article;
 use RuEdu\Model\User;
@@ -64,27 +65,27 @@ $router->post('/login', function () {
     $login = trim($_POST['login'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    // Rate limiting
-    $db = \RuEdu\Engine\Database::getInstance();
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
-    $attempts = $db->count('login_attempts', 'ip_address = ? AND attempted_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)', [$ip]);
-
-    if ($attempts >= 5) {
+    if (!\RuEdu\Engine\RateLimiter::check('admin_login', 5, 900)) {
         Session::flash('error', 'Слишком много попыток. Подождите 15 минут.');
         Router::redirect('admin/login');
     }
 
+    if (\RuEdu\Engine\Captcha::shouldRequire('login')) {
+        if (!\RuEdu\Engine\Captcha::verify($_POST['captcha_answer'] ?? '')) {
+            \RuEdu\Engine\RateLimiter::hit('admin_login');
+            Session::set('_login_failures', (int) Session::get('_login_failures', 0) + 1);
+            Session::flash('error', 'Неверная капча. Попробуйте снова.');
+            Router::redirect('admin/login');
+        }
+    }
+
     if (Auth::attempt($login, $password)) {
-        $db->delete('login_attempts', 'ip_address = ?', [$ip]);
+        \RuEdu\Engine\RateLimiter::clear('admin_login');
         Router::redirect(SiteSetup::isRequired() ? 'admin/setup' : 'admin/');
     }
 
-    $db->insert('login_attempts', [
-        'ip_address' => $ip,
-        'email' => $login,
-        'attempted_at' => date('Y-m-d H:i:s'),
-    ]);
-
+    \RuEdu\Engine\RateLimiter::hit('admin_login');
+    Session::set('_login_failures', (int) Session::get('_login_failures', 0) + 1);
     Session::flash('error', 'Неверный логин или пароль');
     Router::redirect('admin/login');
 });
@@ -103,25 +104,18 @@ $router->post('/forgot-password', function () {
     }
 
     $loginOrEmail = trim($_POST['login'] ?? '');
-    $db = \RuEdu\Engine\Database::getInstance();
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
-    $attempts = $db->count('login_attempts', 'ip_address = ? AND attempted_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)', [$ip]);
 
-    if ($attempts >= 10) {
+    if (!\RuEdu\Engine\RateLimiter::check('admin_forgot_password', 10, 900)) {
         Session::flash('error', 'Слишком много запросов. Подождите 15 минут.');
         Router::redirect('admin/forgot-password');
     }
+
+    \RuEdu\Engine\RateLimiter::hit('admin_forgot_password');
 
     if ($loginOrEmail === '') {
         Session::flash('error', 'Укажите логин или email');
         Router::redirect('admin/forgot-password');
     }
-
-    $db->insert('login_attempts', [
-        'ip_address' => $ip,
-        'email' => $loginOrEmail,
-        'attempted_at' => date('Y-m-d H:i:s'),
-    ]);
 
     $sent = Auth::sendPasswordReset($loginOrEmail);
     if ($sent) {
@@ -154,24 +148,34 @@ $router->post('/reset-password', function () {
         Router::redirect('admin/forgot-password');
     }
 
+    if (!\RuEdu\Engine\RateLimiter::check('admin_reset_password', 5, 900)) {
+        Session::flash('error', 'Слишком много попыток. Подождите 15 минут.');
+        Router::redirect('admin/forgot-password');
+    }
+
     $token = trim($_POST['token'] ?? '');
     $password = $_POST['password'] ?? '';
     $passwordConfirm = $_POST['password_confirm'] ?? '';
 
-    if (strlen($password) < 6) {
-        Session::flash('error', 'Пароль должен быть не менее 6 символов');
+    if (!Auth::isValidPassword($password)) {
+        \RuEdu\Engine\RateLimiter::hit('admin_reset_password');
+        Session::flash('error', 'Пароль должен быть не менее 8 символов и содержать хотя бы одну цифру');
         Router::redirect('admin/reset-password?token=' . urlencode($token));
     }
 
     if ($password !== $passwordConfirm) {
+        \RuEdu\Engine\RateLimiter::hit('admin_reset_password');
         Session::flash('error', 'Пароли не совпадают');
         Router::redirect('admin/reset-password?token=' . urlencode($token));
     }
 
     if (!Auth::resetPassword($token, $password)) {
+        \RuEdu\Engine\RateLimiter::hit('admin_reset_password');
         Session::flash('error', 'Ссылка недействительна или истекла.');
         Router::redirect('admin/forgot-password');
     }
+
+    \RuEdu\Engine\RateLimiter::clear('admin_reset_password');
 
     Session::flash('success', 'Пароль успешно изменён. Войдите с новым паролем.');
     Router::redirect('admin/login');
@@ -303,10 +307,10 @@ $router->post('/pages/save', function () {
     $data = [
         'title' => trim($_POST['title'] ?? ''),
         'slug' => trim($_POST['slug'] ?? ''),
-        'content' => $_POST['content'] ?? '',
+        'content' => HtmlSanitizer::sanitize($_POST['content'] ?? ''),
         'meta_title' => trim($_POST['meta_title'] ?? ''),
         'meta_description' => trim($_POST['meta_description'] ?? ''),
-        'status' => $_POST['status'] ?? 'draft',
+        'status' => in_array($_POST['status'] ?? '', ['draft', 'published'], true) ? $_POST['status'] : 'draft',
         'author_id' => Auth::id(),
     ];
 
@@ -328,18 +332,6 @@ $router->post('/pages/save', function () {
     Cache::flush();
     Session::flash('success', 'Страница сохранена');
     Router::redirect('admin/pages');
-});
-
-$router->get('/api/media', function () {
-    Auth::requireEditor();
-    header('Content-Type: application/json; charset=utf-8');
-    $items = Media::getAll(100);
-    foreach ($items as &$item) {
-        $item['url'] = Media::getUrl((string) ($item['path'] ?? ''));
-    }
-    unset($item);
-    echo json_encode($items, JSON_UNESCAPED_UNICODE);
-    exit;
 });
 
 $router->post('/pages/delete/{id}', function (array $p) {
@@ -379,12 +371,12 @@ $router->post('/articles/save', function () {
     $data = [
         'title' => trim($_POST['title'] ?? ''),
         'slug' => trim($_POST['slug'] ?? ''),
-        'content' => $_POST['content'] ?? '',
+        'content' => HtmlSanitizer::sanitize($_POST['content'] ?? ''),
         'excerpt' => trim($_POST['excerpt'] ?? ''),
         'category_id' => (int) ($_POST['category_id'] ?? 0) ?: null,
         'meta_title' => trim($_POST['meta_title'] ?? ''),
         'meta_description' => trim($_POST['meta_description'] ?? ''),
-        'status' => $_POST['status'] ?? 'draft',
+        'status' => in_array($_POST['status'] ?? '', ['draft', 'published'], true) ? $_POST['status'] : 'draft',
         'author_id' => Auth::id(),
         'published_at' => $_POST['status'] === 'published' ? date('Y-m-d H:i:s') : null,
     ];
@@ -427,6 +419,10 @@ $router->get('/media', function () use ($admin) {
 
 $router->post('/media/upload', function () {
     Auth::requireAuth();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Session::flash('error', 'Ошибка безопасности. Обновите страницу и попробуйте снова.');
+        Router::redirect('admin/media');
+    }
     if (!empty($_FILES['file'])) {
         $result = Media::upload($_FILES['file'], Auth::id());
         if ($result) {
@@ -440,6 +436,9 @@ $router->post('/media/upload', function () {
 
 $router->post('/media/delete/{id}', function (array $p) {
     Auth::requireEditor();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/media');
+    }
     Media::delete((int) $p['id']);
     Session::flash('success', 'Файл удалён');
     Router::redirect('admin/media');
@@ -508,19 +507,27 @@ $router->post('/users/save', function () {
         'name' => $login,
         'login' => $login,
         'email' => trim($_POST['email'] ?? ''),
-        'role' => $_POST['role'] ?? 'author',
-        'status' => $_POST['status'] ?? 'active',
+        'role' => in_array($_POST['role'] ?? '', Auth::roles(), true) ? $_POST['role'] : 'author',
+        'status' => in_array($_POST['status'] ?? '', ['active', 'inactive'], true) ? $_POST['status'] : 'active',
     ];
 
     $password = $_POST['password'] ?? '';
 
     if ($id) {
+        if ($password && !Auth::isValidPassword($password)) {
+            Session::flash('error', 'Пароль должен содержать минимум 8 символов и хотя бы одну цифру');
+            Router::redirect('admin/users/edit/' . $id);
+        }
         if ($password) {
             $data['password'] = Auth::hashPassword($password);
         }
         User::update($id, $data);
     } else {
-        $data['password'] = Auth::hashPassword($password ?: 'password123');
+        if ($password === '' || !Auth::isValidPassword($password)) {
+            Session::flash('error', 'Укажите пароль: минимум 8 символов и хотя бы одна цифра');
+            Router::redirect('admin/users/create');
+        }
+        $data['password'] = Auth::hashPassword($password);
         User::create($data);
     }
 
@@ -530,6 +537,9 @@ $router->post('/users/save', function () {
 
 $router->post('/users/delete/{id}', function (array $p) {
     Auth::requireAdmin();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/users');
+    }
     if ((int) $p['id'] === Auth::id()) {
         Session::flash('error', 'Нельзя удалить себя');
     } else {
@@ -558,6 +568,9 @@ $router->get('/modules', function () use ($admin) {
 
 $router->post('/modules/toggle/{id}', function (array $p) {
     Auth::requireAdmin();
+    if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+        Router::redirect('admin/modules');
+    }
     $db = \RuEdu\Engine\Database::getInstance();
     $mod = $db->fetch("SELECT * FROM " . $db->table('modules') . " WHERE id = ?", [(int) $p['id']]);
     if ($mod) {

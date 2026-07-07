@@ -43,5 +43,4 @@
         </div>
     </div>
 </form>
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-<script>tinymce.init({selector:'#editor',height:400,language:'ru',plugins:'link image lists table code',toolbar:'undo redo | bold italic | link image | bullist numlist | table | code'});</script>
+<?php include ADMIN_PATH . '/views/partials/tinymce.php'; ?>

@@ -20,6 +20,7 @@
                     <label class="form-label">Пароль</label>
                     <input type="password" name="password" class="form-control" required autocomplete="current-password">
                 </div>
+                <?php include ADMIN_PATH . '/views/partials/captcha.php'; ?>
                 <button type="submit" class="btn btn-primary w-100 mb-3">Войти</button>
                 <div class="text-center auth-links">
                     <a href="<?= url('admin/forgot-password') ?>" class="text-muted small">Забыли пароль?</a>

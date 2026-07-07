@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initA11y();
     initCookieBanner();
     initAjaxForms();
+    initCaptcha();
     initMapFrames();
 });
 
@@ -91,6 +92,7 @@ function initAjaxForms() {
                         form.reset();
                     } else {
                         showToast(result.data.message || 'Не удалось отправить сообщение', 'error');
+                        refreshCaptcha(form, result.data.captchaUrl);
                     }
                 })
                 .catch(function() {
@@ -104,6 +106,54 @@ function initAjaxForms() {
                 });
         });
     });
+}
+
+function initCaptcha() {
+    document.querySelectorAll('[data-captcha-refresh]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var group = button.closest('[data-captcha-group]') || document;
+            refreshCaptcha(group);
+        });
+    });
+}
+
+function refreshCaptcha(scope, imageUrl) {
+    var root = scope && scope.querySelector ? scope : document;
+    var image = root.querySelector('[data-captcha-image]');
+    var answer = root.querySelector('input[name="captcha_answer"]');
+    if (answer) {
+        answer.value = '';
+    }
+
+    if (!image) {
+        return;
+    }
+
+    if (imageUrl) {
+        image.src = imageUrl;
+        return;
+    }
+
+    fetch(routePath('captcha/refresh'), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.ok && data.imageUrl) {
+                image.src = data.imageUrl;
+            }
+        })
+        .catch(function() {
+            image.src = image.src.split('?')[0] + '?t=' + Date.now();
+        });
+}
+
+function routePath(path) {
+    var base = document.body.getAttribute('data-base-path') || '';
+    if (base && base.slice(-1) === '/') {
+        base = base.slice(0, -1);
+    }
+    return (base ? base + '/' : '/') + path.replace(/^\//, '');
 }
 
 function toggleA11y() {

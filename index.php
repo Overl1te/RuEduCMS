@@ -16,6 +16,9 @@ use RuEdu\Engine\Cache;
 use RuEdu\Engine\Migrate;
 use RuEdu\Engine\SearchIndexer;
 use RuEdu\Engine\SiteStructure;
+use RuEdu\Engine\Captcha;
+use RuEdu\Engine\RateLimiter;
+use RuEdu\Engine\Session;
 use RuEdu\Model\Page;
 use RuEdu\Model\Article;
 use RuEdu\Model\Menu;
@@ -46,6 +49,30 @@ $render404 = function (): void {
 };
 
 $router->setNotFoundHandler($render404);
+
+$router->get('/captcha/image', function () {
+    if (!RateLimiter::check('captcha_image', 30, 900)) {
+        http_response_code(429);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo 'Too many requests';
+        exit;
+    }
+    RateLimiter::hit('captcha_image');
+    Captcha::generateImage();
+});
+
+$router->get('/captcha/refresh', function () {
+    if (!RateLimiter::check('captcha_image', 30, 900)) {
+        http_response_code(429);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => false, 'message' => 'Слишком много запросов'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    RateLimiter::hit('captcha_image');
+    Captcha::invalidate();
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['ok' => true, 'imageUrl' => Captcha::imageUrl()], JSON_UNESCAPED_UNICODE);
+});
 
 // SEO: robots.txt, IndexNow, sitemap
 $router->get('/robots.txt', function () {

@@ -17,6 +17,14 @@ class Config
             'language' => 'ru',
             'debug' => false,
             'update_source' => null,
+            'trusted_proxies' => [],
+            'captcha_enabled' => true,
+            'captcha_on_forms' => true,
+            'captcha_on_login' => false,
+            'captcha_length' => 5,
+            'captcha_login_after_failures' => 2,
+            'post_max_bytes' => 10485760,
+            'rate_limit_cleanup_hours' => 24,
         ];
     }
 

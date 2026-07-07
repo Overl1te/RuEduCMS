@@ -1,6 +1,8 @@
-# RuEduCMS на nginx — стандартная конфигурация PHP-сайта.
-# На большинстве хостингов она уже включена, ничего настраивать не нужно.
+# RuEduCMS — nginx с базовой защитой от перегрузки
 # Для своего VPS — укажите root и fastcgi_pass:
+
+limit_req_zone $binary_remote_addr zone=ruedu_general:10m rate=10r/s;
+limit_conn_zone $binary_remote_addr zone=ruedu_conn:10m;
 
 server {
     listen 80;
@@ -8,7 +10,14 @@ server {
     root /var/www/rueducms;
     index index.php;
 
+    client_max_body_size 10m;
+    client_body_timeout 12s;
+    client_header_timeout 12s;
+    send_timeout 12s;
+
     location / {
+        limit_req zone=ruedu_general burst=20 nodelay;
+        limit_conn ruedu_conn 20;
         try_files $uri $uri/ /index.php?$is_args$args;
     }
 
@@ -31,8 +40,10 @@ server {
     }
 
     location ~ \.php$ {
+        limit_req zone=ruedu_general burst=10 nodelay;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+        fastcgi_read_timeout 30s;
     }
 }

@@ -207,13 +207,13 @@ CREATE TABLE IF NOT EXISTS `{{prefix}}password_resets` (
     INDEX `idx_expires` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `{{prefix}}login_attempts` (
+CREATE TABLE IF NOT EXISTS `{{prefix}}rate_limits` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `rate_key` VARCHAR(128) NOT NULL,
     `ip_address` VARCHAR(45) NOT NULL,
-    `email` VARCHAR(255) NOT NULL,
-    `attempted_at` DATETIME NOT NULL,
-    INDEX `idx_ip` (`ip_address`),
-    INDEX `idx_time` (`attempted_at`)
+    `hit_at` DATETIME NOT NULL,
+    INDEX `idx_key_time` (`rate_key`, `hit_at`),
+    INDEX `idx_ip_time` (`ip_address`, `hit_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Начальные данные модулей

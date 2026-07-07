@@ -25,6 +25,7 @@ class HelpDocs
             ['slug' => 'settings', 'title' => 'Настройки сайта', 'icon' => 'bi-gear', 'group' => 'general'],
             ['slug' => 'users', 'title' => 'Пользователи и роли', 'icon' => 'bi-people', 'group' => 'general'],
             ['slug' => 'updates', 'title' => 'Обновления', 'icon' => 'bi-arrow-repeat', 'group' => 'general'],
+            ['slug' => 'security', 'title' => 'Безопасность', 'icon' => 'bi-shield-lock', 'group' => 'general'],
             ['slug' => 'pages', 'title' => 'Страницы', 'icon' => 'bi-file-earmark-text', 'group' => 'content'],
             ['slug' => 'articles', 'title' => 'Новости', 'icon' => 'bi-newspaper', 'group' => 'content'],
             ['slug' => 'media', 'title' => 'Медиабиблиотека', 'icon' => 'bi-images', 'group' => 'content'],

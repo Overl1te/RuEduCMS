@@ -1,10 +1,10 @@
 <section class="cta-band">
     <div class="container cta-band__inner" data-animate>
         <?php if (!empty($props['title'])): ?>
-        <h2 data-fg-element="title"><?= htmlspecialchars((string) $props['title']) ?></h2>
+        <h2><?= htmlspecialchars((string) $props['title']) ?></h2>
         <?php endif; ?>
         <?php if (!empty($props['text'])): ?>
-        <p data-fg-element="text"><?= htmlspecialchars((string) $props['text']) ?></p>
+        <p><?= htmlspecialchars((string) $props['text']) ?></p>
         <?php endif; ?>
         <?php if (!empty($props['buttons']) && is_array($props['buttons'])): ?>
         <div class="hero-links">
@@ -14,7 +14,7 @@
                 $rawUrl = $btn['url'] ?? '';
                 $url = is_array($rawUrl) ? (string) ($rawUrl['url'] ?? '') : (string) $rawUrl;
                 ?>
-                <a href="<?= htmlspecialchars(route(ltrim($url, '/'))) ?>" class="btn <?= $btnClass ?>" data-fg-element="button">
+                <a href="<?= htmlspecialchars(route(ltrim($url, '/'))) ?>" class="btn <?= $btnClass ?>">
                     <?= htmlspecialchars((string) $btn['label']) ?>
                 </a>
             <?php endforeach; ?>

@@ -67,6 +67,9 @@ Hook::on('register_admin_routes', function ($router) {
 
     $router->post('/gallery/upload/{albumId}', function ($p) {
         Auth::requireEditor();
+        if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+            Router::redirect('admin/gallery');
+        }
         $albumId = (int)$p['albumId'];
         if (!empty($_FILES['images'])) {
             $db = Database::getInstance();

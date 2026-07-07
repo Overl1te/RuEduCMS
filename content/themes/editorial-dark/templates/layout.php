@@ -10,7 +10,7 @@
     <?= \RuEdu\Engine\ThemeCustomizer::renderStyleTag() ?>
     <?= $schema ?? '' ?>
 </head>
-<body class="ed-body"<?= \RuEdu\Engine\AdminBar::bodyClass() ?>>
+<body class="ed-body" data-base-path="<?= htmlspecialchars(\RuEdu\Engine\Router::basePath()) ?>"<?= \RuEdu\Engine\AdminBar::bodyClass() ?>>
     <div class="ed-wrap">
         <?= \RuEdu\Engine\AdminBar::render([
             'page' => $page ?? null,

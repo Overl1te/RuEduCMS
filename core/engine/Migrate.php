@@ -123,6 +123,7 @@ class Migrate
             '0.0.16' => static fn (): bool => self::tableExists($pdo, $prefix . 'pages')
                 && self::columnExists($pdo, $prefix . 'pages', 'field_data')
                 && !self::tableExists($pdo, $prefix . 'field_groups'),
+            '0.0.17' => static fn (): bool => self::settingExists($pdo, $prefix, 'schema_builder_removed'),
         ];
 
         foreach (Version::getMigrationFiles() as $version => $_) {
@@ -139,15 +140,6 @@ class Migrate
 
     private static function repairSchema(\PDO $pdo, string $prefix): void
     {
-        $pages = $prefix . 'pages';
-
-        if (
-            self::tableExists($pdo, $pages)
-            && !self::columnExists($pdo, $pages, 'content_blocks')
-        ) {
-            self::runMigrationFile(CORE_PATH . '/migrations/0.0.12.php', '0.0.12');
-        }
-
         $detected = self::detectAppliedVersion($pdo, $prefix);
         if (version_compare(Version::getDbVersion(), $detected, '<')) {
             Version::setDbVersion($detected);

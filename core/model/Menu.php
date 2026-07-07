@@ -6,6 +6,7 @@ namespace RuEdu\Model;
 
 use RuEdu\Engine\Database;
 use RuEdu\Engine\Modules;
+use RuEdu\Engine\UrlSafety;
 
 class Menu
 {
@@ -50,6 +51,7 @@ class Menu
 
     private static function normalizeUrl(string $url): string
     {
+        $url = UrlSafety::sanitizeMenuUrl($url);
         if ($url === '' || $url === '#') {
             return $url;
         }
@@ -74,12 +76,13 @@ class Menu
         $db->delete('menu_items', 'menu_id = ?', [$menuId]);
 
         foreach ($items as $order => $item) {
+            $target = ($item['target'] ?? '_self') === '_blank' ? '_blank' : '_self';
             $db->insert('menu_items', [
                 'menu_id' => $menuId,
                 'parent_id' => $item['parent_id'] ?? null,
                 'title' => $item['title'],
-                'url' => $item['url'],
-                'target' => $item['target'] ?? '_self',
+                'url' => UrlSafety::sanitizeMenuUrl((string) ($item['url'] ?? '')),
+                'target' => $target,
                 'sort_order' => $order,
             ]);
         }

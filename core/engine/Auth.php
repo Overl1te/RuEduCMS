@@ -23,13 +23,16 @@ class Auth
         }
 
         Session::set(self::SESSION_KEY, (int) $user['id']);
+        session_regenerate_id(true);
         $db->update('users', ['last_login' => date('Y-m-d H:i:s')], 'id = ?', [(int) $user['id']]);
+        Session::remove('_login_failures');
         return true;
     }
 
     public static function logout(): void
     {
         Session::remove(self::SESSION_KEY);
+        session_regenerate_id(true);
     }
 
     public static function check(): bool
@@ -120,7 +123,7 @@ class Auth
     public static function resetPassword(string $token, string $password): bool
     {
         $reset = self::findPasswordReset($token);
-        if (!$reset || strlen($password) < 6) {
+        if (!$reset || !self::isValidPassword($password)) {
             return false;
         }
 
@@ -164,6 +167,11 @@ class Auth
     public static function canManageModules(): bool
     {
         return self::isAdmin();
+    }
+
+    public static function isValidPassword(string $password): bool
+    {
+        return strlen($password) >= 8 && preg_match('/\d/', $password) === 1;
     }
 
     public static function hashPassword(string $password): string

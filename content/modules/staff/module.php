@@ -65,7 +65,7 @@ Hook::on('register_admin_routes', function ($router) {
             'experience' => trim($_POST['experience'] ?? ''),
             'email' => trim($_POST['email'] ?? ''),
             'phone' => trim($_POST['phone'] ?? ''),
-            'status' => $_POST['status'] ?? 'active',
+            'status' => in_array($_POST['status'] ?? '', ['active', 'inactive'], true) ? $_POST['status'] : 'active',
             'sort_order' => (int)($_POST['sort_order'] ?? 0),
         ];
 
@@ -83,6 +83,9 @@ Hook::on('register_admin_routes', function ($router) {
 
     $router->post('/staff/delete/{id}', function ($p) {
         Auth::requireEditor();
+        if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+            Router::redirect('admin/staff');
+        }
         Database::getInstance()->delete('staff', 'id = ?', [(int)$p['id']]);
         Session::flash('success', 'Удалено');
         Router::redirect('admin/staff');

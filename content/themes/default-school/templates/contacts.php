@@ -17,9 +17,15 @@ include __DIR__ . '/partials/page-header.php';
     </div>
     <h2 data-animate>Обратная связь</h2>
     <form method="POST" action="<?= route('forms/submit/contact') ?>" class="contact-form" data-ajax-form data-animate style="max-width:560px">
+        <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\RuEdu\Engine\Session::csrfToken()) ?>">
+        <div class="hp-field" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+            <label>Сайт</label>
+            <input type="text" name="website" tabindex="-1" autocomplete="off">
+        </div>
         <div class="form-group"><label>Имя</label><input type="text" name="name" required></div>
         <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
         <div class="form-group"><label>Сообщение</label><textarea name="message" rows="4" required></textarea></div>
+        <?php include __DIR__ . '/partials/captcha.php'; ?>
         <div class="form-check">
             <input type="checkbox" name="consent" required id="consent">
             <label for="consent"><?= htmlspecialchars(\RuEdu\Model\Setting::get('fz152_text', 'Я согласен на обработку персональных данных.')) ?></label>

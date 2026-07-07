@@ -70,6 +70,7 @@ $assetBase = \RuEdu\Engine\Router::path('install/assets/');
             <h2 class="step-title">Шаг 2: Подключение к базе данных</h2>
             <p class="step-desc">Укажите параметры доступа к MySQL или MariaDB.</p>
             <form method="POST" data-install-check data-messages='["Проверка подключения…","Установка соединения…","Готово!"]'>
+                <input type="hidden" name="_csrf" value="<?= htmlspecialchars($installCsrf) ?>">
                 <div class="form-group">
                     <label for="db_host">Хост БД</label>
                     <input type="text" id="db_host" name="db_host" value="<?= htmlspecialchars($installConfig['db_host'] ?? 'localhost') ?>" required>
@@ -101,6 +102,7 @@ $assetBase = \RuEdu\Engine\Router::path('install/assets/');
             <h2 class="step-title">Шаг 3: Создание таблиц</h2>
             <p class="step-desc">Нажмите кнопку для создания структуры базы данных.</p>
             <form method="POST" data-install-loading data-messages='["Подключение к базе данных…","Создание таблиц…","Настройка индексов…","Готово!"]'>
+                <input type="hidden" name="_csrf" value="<?= htmlspecialchars($installCsrf) ?>">
                 <div class="actions">
                     <button type="submit" class="btn">
                         Создать таблицы <span class="btn-arrow">→</span>
@@ -112,6 +114,7 @@ $assetBase = \RuEdu\Engine\Router::path('install/assets/');
             <h2 class="step-title">Шаг 4: Настройка сайта</h2>
             <p class="step-desc">Задайте основные параметры и учётную запись администратора.</p>
             <form method="POST" data-install-loading data-messages='["Сохранение конфигурации…","Создание администратора…","Подготовка панели…","Завершение…"]'>
+                <input type="hidden" name="_csrf" value="<?= htmlspecialchars($installCsrf) ?>">
                 <div class="form-group">
                     <label for="site_name">Название сайта</label>
                     <input type="text" id="site_name" name="site_name" required placeholder="МБОУ СОШ №1"
@@ -135,7 +138,7 @@ $assetBase = \RuEdu\Engine\Router::path('install/assets/');
                 </div>
                 <div class="form-group">
                     <label for="admin_password">Пароль</label>
-                    <input type="password" id="admin_password" name="admin_password" required minlength="6">
+                    <input type="password" id="admin_password" name="admin_password" required minlength="8">
                 </div>
                 <div class="actions">
                     <button type="submit" class="btn">

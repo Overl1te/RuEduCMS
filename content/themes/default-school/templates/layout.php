@@ -10,7 +10,7 @@
     <?= \RuEdu\Engine\ThemeCustomizer::renderStyleTag() ?>
     <?= $schema ?? '' ?>
 </head>
-<body class="is-loading"<?= \RuEdu\Engine\AdminBar::bodyClass() ?>>
+<body class="is-loading" data-base-path="<?= htmlspecialchars(\RuEdu\Engine\Router::basePath()) ?>"<?= \RuEdu\Engine\AdminBar::bodyClass() ?>>
     <div class="page-loader" id="pageLoader" aria-hidden="true">
         <div class="page-loader__ring"></div>
     </div>

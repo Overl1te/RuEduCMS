@@ -76,7 +76,12 @@ Hook::on('register_admin_routes', function ($router) {
             Router::redirect('admin/sveden');
         }
 
-        $section = $_POST['section'] ?? '';
+        $section = (string) ($_POST['section'] ?? '');
+        if (!array_key_exists($section, SvedenModule::getSectionList())) {
+            Session::flash('error', 'Неизвестный раздел');
+            Router::redirect('admin/sveden');
+        }
+
         $fields = SvedenModule::getSectionFields($section);
         $data = [];
         foreach ($fields as $key => $label) {

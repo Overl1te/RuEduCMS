@@ -7,21 +7,44 @@ use RuEdu\Engine\ErrorPage;
 use RuEdu\Engine\Session;
 use RuEdu\Engine\Router;
 use RuEdu\Engine\Config;
+use RuEdu\Engine\RateLimiter;
+use RuEdu\Engine\Captcha;
 use RuEdu\Model\Setting;
 
 Hook::on('register_routes', function ($router) {
     $router->post('/forms/submit/{slug}', function ($params) {
         $isAjax = ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest';
-        $respond = function (bool $ok, string $message, int $status = 200) use ($isAjax): void {
+        $respond = function (bool $ok, string $message, int $status = 200, array $extra = []) use ($isAjax): void {
             if ($isAjax) {
                 http_response_code($status);
                 header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['ok' => $ok, 'message' => $message], JSON_UNESCAPED_UNICODE);
+                echo json_encode(array_merge([
+                    'ok' => $ok,
+                    'message' => $message,
+                    'captchaUrl' => Captcha::imageUrl(),
+                ], $extra), JSON_UNESCAPED_UNICODE);
                 exit;
             }
             Session::flash($ok ? 'site_success' : 'site_error', $message);
             Router::redirect('contacts');
         };
+
+        if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+            $respond(false, 'Ошибка безопасности. Обновите страницу и попробуйте снова.', 403);
+        }
+
+        if (!RateLimiter::check('form_submit', 5, 900)) {
+            $respond(false, 'Слишком много отправок. Подождите 15 минут.', 429);
+        }
+
+        if (trim((string) ($_POST['website'] ?? '')) !== '') {
+            $respond(true, 'Ваше сообщение отправлено!');
+        }
+
+        if (Captcha::shouldRequire('forms') && !Captcha::verify($_POST['captcha_answer'] ?? '')) {
+            RateLimiter::hit('form_submit');
+            $respond(false, 'Неверная капча. Попробуйте снова.', 422);
+        }
 
         $db = Database::getInstance();
         $form = $db->fetch("SELECT * FROM " . $db->table('forms') . " WHERE slug = ? AND status = 'active'", [$params['slug']]);
@@ -38,8 +61,9 @@ Hook::on('register_routes', function ($router) {
         }
 
         $submissionData = [];
+        $ignored = ['consent', '_csrf', 'captcha_answer', 'website'];
         foreach ($_POST as $key => $value) {
-            if ($key !== 'consent') {
+            if (!in_array($key, $ignored, true)) {
                 $submissionData[$key] = trim((string) $value);
             }
         }
@@ -48,10 +72,12 @@ Hook::on('register_routes', function ($router) {
             $respond(false, 'Заполните все поля формы', 422);
         }
 
+        RateLimiter::hit('form_submit');
+
         $db->insert('form_submissions', [
             'form_id' => $form['id'],
             'data' => json_encode($submissionData, JSON_UNESCAPED_UNICODE),
-            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
+            'ip_address' => \RuEdu\Engine\Request::clientIp(),
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
@@ -83,6 +109,9 @@ Hook::on('register_admin_routes', function ($router) {
 
     $router->post('/forms/submissions/read/{id}', function ($p) {
         Auth::requireAuth();
+        if (!Session::verifyCsrf($_POST['_csrf'] ?? '')) {
+            Router::redirect('admin/forms/submissions');
+        }
         Database::getInstance()->update('form_submissions', ['is_read' => 1], 'id = ?', [(int)$p['id']]);
         Router::redirect('admin/forms/submissions');
     });

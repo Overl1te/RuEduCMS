@@ -12,11 +12,11 @@
                 <input type="hidden" name="token" value="<?= htmlspecialchars($token ?? '') ?>">
                 <div class="mb-3">
                     <label class="form-label">Новый пароль</label>
-                    <input type="password" name="password" class="form-control" required minlength="6" autofocus>
+                    <input type="password" name="password" class="form-control" required minlength="8" autofocus>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Повторите пароль</label>
-                    <input type="password" name="password_confirm" class="form-control" required minlength="6">
+                    <input type="password" name="password_confirm" class="form-control" required minlength="8">
                 </div>
                 <button type="submit" class="btn btn-primary w-100 mb-3">Сохранить пароль</button>
                 <div class="text-center auth-links">

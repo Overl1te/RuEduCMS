@@ -65,18 +65,19 @@ class SiteBranding
             return null;
         }
 
-        if (!in_array($file['type'] ?? '', self::ALLOWED_TYPES, true)) {
+        $ext = strtolower(pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION) ?: 'png');
+        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'ico'], true)) {
+            return null;
+        }
+
+        $mime = self::detectMime((string) ($file['tmp_name'] ?? ''));
+        if ($mime === null || !in_array($mime, self::ALLOWED_TYPES, true)) {
             return null;
         }
 
         $uploadDir = UPLOADS_PATH . '/site';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
-        }
-
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION) ?: 'png');
-        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'ico'], true)) {
-            return null;
         }
 
         $relativePath = 'site/logo.' . $ext;
@@ -117,5 +118,22 @@ class SiteBranding
                 }
             }
         }
+    }
+
+    private static function detectMime(string $tmpPath): ?string
+    {
+        if (!is_file($tmpPath)) {
+            return null;
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo === false) {
+            return null;
+        }
+
+        $mime = finfo_file($finfo, $tmpPath);
+        finfo_close($finfo);
+
+        return is_string($mime) ? $mime : null;
     }
 }
