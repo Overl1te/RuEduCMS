@@ -6,10 +6,7 @@ $title = 'Страницы';
 ?>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Страницы</h2>
-    <div class="d-flex gap-2">
-        <a href="<?= url('admin/home/builder') ?>" class="btn btn-outline-primary"><i class="bi bi-layout-wtf"></i> Главная</a>
-        <a href="<?= url('admin/pages/create') ?>" class="btn btn-primary"><i class="bi bi-plus"></i> Создать</a>
-    </div>
+    <a href="<?= url('admin/pages/create') ?>" class="btn btn-primary"><i class="bi bi-plus"></i> Создать</a>
 </div>
 
 <?php if (!empty($systemPages)): ?>
@@ -38,15 +35,6 @@ $title = 'Страницы';
                 <?php if (!empty($p['content_url'])): ?>
                     <a href="<?= url($p['content_url']) ?>" class="btn btn-sm btn-outline-primary" title="Редактировать содержимое">
                         <i class="bi bi-pencil"></i>
-                    </a>
-                <?php endif; ?>
-                <?php if (($p['id'] ?? '') === 'home'): ?>
-                    <a href="<?= url('admin/home/builder') ?>" class="btn btn-sm btn-outline-primary" title="Конструктор главной">
-                        <i class="bi bi-layout-wtf"></i>
-                    </a>
-                <?php elseif (empty($p['content_url'])): ?>
-                    <a href="<?= url('admin/pages/structure/' . rawurlencode((string) $p['id'])) ?>" class="btn btn-sm btn-outline-primary" title="Структура">
-                        <i class="bi bi-layout-wtf"></i>
                     </a>
                 <?php endif; ?>
                 <?php if (Auth::isAdmin()): ?>
@@ -97,9 +85,6 @@ $title = 'Страницы';
                     <i class="bi bi-box-arrow-up-right"></i>
                 </a>
                 <a href="<?= url('admin/pages/edit/' . $p['id']) ?>" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                <?php if (in_array($p['content_mode'] ?? '', ['blocks', 'fields'], true)): ?>
-                <a href="<?= url('admin/pages/builder/' . $p['id']) ?>" class="btn btn-sm btn-outline-primary" title="Конструктор"><i class="bi bi-layout-wtf"></i></a>
-                <?php endif; ?>
                 <form method="POST" action="<?= url('admin/pages/delete/' . $p['id']) ?>" class="d-inline" onsubmit="return confirm('Удалить?')">
                     <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf_token) ?>">
                     <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>

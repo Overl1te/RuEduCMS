@@ -120,6 +120,9 @@ class Migrate
             '0.0.14' => static fn (): bool => self::tableExists($pdo, $prefix . 'field_groups')
                 && self::fieldGroupSlugExists($pdo, $prefix, 'home-page'),
             '0.0.15' => static fn (): bool => self::settingExists($pdo, $prefix, 'home_field_data'),
+            '0.0.16' => static fn (): bool => self::tableExists($pdo, $prefix . 'pages')
+                && self::columnExists($pdo, $prefix . 'pages', 'field_data')
+                && !self::tableExists($pdo, $prefix . 'field_groups'),
         ];
 
         foreach (Version::getMigrationFiles() as $version => $_) {
@@ -136,7 +139,6 @@ class Migrate
 
     private static function repairSchema(\PDO $pdo, string $prefix): void
     {
-        $groups = $prefix . 'field_groups';
         $pages = $prefix . 'pages';
 
         if (
@@ -144,30 +146,6 @@ class Migrate
             && !self::columnExists($pdo, $pages, 'content_blocks')
         ) {
             self::runMigrationFile(CORE_PATH . '/migrations/0.0.12.php', '0.0.12');
-        }
-
-        if (!self::tableExists($pdo, $groups)) {
-            self::runMigrationFile(CORE_PATH . '/migrations/0.0.13.php', '0.0.13');
-        }
-
-        if (
-            self::tableExists($pdo, $groups)
-            && self::tableExists($pdo, $pages)
-            && !self::columnExists($pdo, $pages, 'field_data')
-        ) {
-            self::runMigrationFile(CORE_PATH . '/migrations/0.0.13.php', '0.0.13');
-        }
-
-        if (self::tableExists($pdo, $groups) && !self::fieldGroupSlugExists($pdo, $prefix, 'home-page')) {
-            self::runMigrationFile(CORE_PATH . '/migrations/0.0.14.php', '0.0.14');
-        }
-
-        if (
-            self::tableExists($pdo, $groups)
-            && self::fieldGroupSlugExists($pdo, $prefix, 'home-page')
-            && !self::settingExists($pdo, $prefix, 'home_field_data')
-        ) {
-            self::runMigrationFile(CORE_PATH . '/migrations/0.0.15.php', '0.0.15');
         }
 
         $detected = self::detectAppliedVersion($pdo, $prefix);
